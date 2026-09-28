@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>さくらや 問い合わせ手帳</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="問い合わせ手帳">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+html,body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+img{max-width:100%}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap">
+<style>
+:root{
+  --bg:#EEF1F5; --surface:#FFFFFF; --surface2:#F6F8FB; --ink:#1B2436; --muted:#5B6679; --line:#D9DFE8;
+  --chip:#E6EAF1; --chip-ink:#26314A; --accent:#B23049; --accent-soft:#F6E3E7; --accent-ink:#FFFFFF;
+  --ok:#2C7A57; --warn:#A8671A; --warn-soft:#FBEFD9; --shadow:0 1px 2px rgba(20,30,50,.06),0 4px 14px rgba(20,30,50,.06);
+  --r:12px;
+  --f-body:"BIZ UDPGothic","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --f-disp:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10151E; --surface:#182031; --surface2:#1D2638; --ink:#E7ECF4; --muted:#9BA7BB; --line:#2B3549;
+    --chip:#243048; --chip-ink:#DCE3EE; --accent:#E2687D; --accent-soft:#3A2230; --accent-ink:#1A0C12;
+    --ok:#62C497; --warn:#E3A857; --warn-soft:#3A2E1A; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10151E; --surface:#182031; --surface2:#1D2638; --ink:#E7ECF4; --muted:#9BA7BB; --line:#2B3549;
+  --chip:#243048; --chip-ink:#DCE3EE; --accent:#E2687D; --accent-soft:#3A2230; --accent-ink:#1A0C12;
+  --ok:#62C497; --warn:#E3A857; --warn-soft:#3A2E1A; --shadow:none;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.field .switch input{width:22px;height:22px;padding:0;flex:none}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:10px 16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand h1{font-size:19px;font-weight:900;letter-spacing:.02em}
+.brand span{font-size:12px;color:var(--muted)}
+.fy{display:flex;align-items:center;gap:4px;background:var(--chip);border-radius:999px;padding:3px}
+.fy button{border:0;background:transparent;width:36px;height:36px;border-radius:999px;font-size:16px}
+.fy button:hover{background:var(--surface)}
+.fy b{font-size:14px;padding:0 4px;min-width:6.5em;text-align:center}
+.fy small{display:block;font-size:10px;color:var(--muted);font-weight:400;line-height:1}
+.memo-btn{border:0;background:var(--accent);color:var(--accent-ink);border-radius:999px;height:42px;padding:0 18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.memo-btn .cnt{background:var(--surface);color:var(--accent);border-radius:999px;font-size:12px;min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px}
+
+/* layout */
+.app{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;padding:16px;max-width:1280px;margin:0 auto}
+@media (max-width:860px){.app{grid-template-columns:1fr;gap:12px;padding:12px 16px}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.label{font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+
+/* picker */
+.picker{padding:14px;display:flex;flex-direction:column;gap:10px;align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px)}
+@media (max-width:860px){.picker{position:static}}
+.picker-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.picker-head .cur{display:none;font-weight:700}
+.toggle-list{display:none;border:1px solid var(--line);background:var(--surface2);border-radius:999px;height:36px;padding:0 14px;font-size:13px}
+@media (max-width:860px){
+  .picker.collapsed .picker-body{display:none}
+  .picker.collapsed .picker-head .cur{display:block}
+  .toggle-list{display:block}
+}
+.picker-body{display:flex;flex-direction:column;gap:10px}
+.search{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:0 14px;font-size:16px}
+.seg{display:flex;background:var(--chip);border-radius:10px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:8px;height:38px;font-size:14px;color:var(--chip-ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);font-weight:700;box-shadow:var(--shadow)}
+.school-list{display:grid;grid-template-columns:1fr;gap:6px}
+@media (max-width:860px){.school-list{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+@media (min-width:861px){.school-list{max-height:calc(100vh - 360px);min-height:240px;overflow-y:auto;padding-right:2px}}
+.area-chips{gap:6px}
+.area-chips .chip{min-height:38px;padding:0 12px;font-size:14px}
+.area-chips .chip small{font-size:11px;opacity:.65}
+.grp{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--muted);padding:6px 2px 0;display:flex;justify-content:space-between}
+.school{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-height:56px;padding:8px 12px;text-align:left;display:flex;align-items:center;gap:10px}
+.school:hover{border-color:var(--muted)}
+.school[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.school .t{font-size:11px;border-radius:6px;padding:1px 6px;background:var(--chip);color:var(--chip-ink);flex:none}
+.school .n{font-weight:700;line-height:1.3}
+.school .s{font-size:12px;color:var(--muted);display:block;font-weight:400}
+.school .dots{margin-left:auto;display:flex;gap:3px;flex:none}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);flex:none}
+.empty-note{font-size:13px;color:var(--muted);padding:6px 2px}
+
+/* detail */
+.detail{display:flex;flex-direction:column;gap:12px;min-width:0}
+.school-card{padding:16px;display:flex;flex-direction:column;gap:14px}
+.sc-head{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.sc-head h2{font-size:24px;font-weight:900;line-height:1.2}
+.sc-head .meta{color:var(--muted);font-size:13px}
+.grades{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.grades{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.grade{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;align-items:center;gap:10px;background:var(--surface2)}
+.grade .sw{width:30px;height:30px;border-radius:8px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.grade b{display:block;font-size:15px;line-height:1.25}
+.grade small{display:block;color:var(--muted);font-size:11px;line-height:1.3}
+.grade.next{border-style:dashed}
+.cycle-note{font-size:13px;color:var(--muted);margin:0}
+.cycle-note strong{color:var(--ink)}
+.notes{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.notes li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.tag{flex:none;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;margin-top:2px;background:var(--chip);color:var(--chip-ink);white-space:nowrap}
+.tag.t-must{background:var(--accent-soft);color:var(--accent)}
+.tag.t-change{background:var(--warn-soft);color:var(--warn)}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:7px;font-size:15px;color:var(--ink)}
+.chip:hover{border-color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip .req{font-size:10px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 4px}
+.chip[disabled]{opacity:.4;cursor:default}
+.chip.sm{min-height:40px;padding:0 13px;font-size:14px}
+
+.filters{padding:14px 16px;display:grid;gap:12px}
+.frow{display:grid;grid-template-columns:64px minmax(0,1fr);gap:10px;align-items:start}
+.frow>.label{padding-top:13px}
+@media (max-width:520px){.frow{grid-template-columns:1fr;gap:6px}.frow>.label{padding-top:0}}
+.frow .seg{max-width:320px}
+.fbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px}
+.linkbtn{border:0;background:transparent;color:var(--accent);font-weight:700;height:40px;padding:0 6px}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:14px;min-height:40px}
+.switch input{width:20px;height:20px;accent-color:var(--accent)}
+
+/* results */
+.results{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.rhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.rhead .big{font-family:var(--f-disp);font-size:30px;font-weight:900;line-height:1}
+.rhead .sub{color:var(--muted);font-size:13px}
+.sample{margin-left:auto;font-size:11px;font-weight:700;border:1px dashed var(--warn);color:var(--warn);border-radius:6px;padding:2px 8px}
+.summary{font-size:14px;background:var(--surface2);border-radius:10px;padding:8px 12px}
+.rlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;background:var(--surface)}
+.item .cond{grid-row:span 2;width:40px;height:40px;border-radius:9px;display:grid;place-items:center;font-family:var(--f-disp);font-weight:900;font-size:20px}
+.cond-A{background:#DDF1E6;color:#1E6B47}
+.cond-B{background:#E3EAF7;color:#2C4E8C}
+.cond-C{background:#F1ECE2;color:#7A5B25}
+:root[data-theme="dark"] .cond-A{background:#1D3A2D;color:#8EE0B5}
+:root[data-theme="dark"] .cond-B{background:#22304A;color:#A9C3F1}
+:root[data-theme="dark"] .cond-C{background:#3A3122;color:#E6C68E}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .cond-A{background:#1D3A2D;color:#8EE0B5}
+  :root:not([data-theme="light"]) .cond-B{background:#22304A;color:#A9C3F1}
+  :root:not([data-theme="light"]) .cond-C{background:#3A3122;color:#E6C68E}
+}
+.item .nm{font-weight:700;line-height:1.3;min-width:0}
+.item .sz{font-size:18px;font-weight:700}
+.item .pr{font-weight:700;text-align:right}
+.item .info{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.item .shelf{grid-column:3;text-align:right;font-size:12px;color:var(--muted)}
+.old{font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:0 5px}
+.relax{display:grid;gap:6px}
+.relax p{margin:0;font-size:14px}
+
+/* memo sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,15,25,.45);z-index:40}
+.sheet{position:fixed;right:0;top:0;bottom:0;width:min(440px,100%);background:var(--surface);z-index:41;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 16px calc(env(safe-area-inset-bottom,0px) + 14px);gap:12px;overflow-y:auto;border-left:1px solid var(--line)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between}
+.sheet-head h2{font-size:18px}
+.x{border:0;background:var(--chip);width:40px;height:40px;border-radius:999px;font-size:18px}
+.field{display:grid;gap:4px}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:16px;width:100%}
+.field textarea{min-height:84px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;height:46px;padding:0 16px;font-weight:700}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);flex:1}
+.logs{display:grid;gap:8px}
+.log{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;display:grid;gap:4px;background:var(--surface2)}
+.log .lh{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.log .lh b{font-size:14px}
+.log .del{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:12px;height:30px}
+.cb{font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:4px;padding:1px 6px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-size:14px;z-index:60}
+@media (prefers-reduced-motion:no-preference){.chip,.school,.seg button{transition:background .12s,border-color .12s,color .12s}}
+.kind-chips{gap:6px}
+.kind-chips .chip{min-height:38px;padding:0 12px;font-size:14px}
+.kind-chips .chip small{font-size:11px;opacity:.65}
+.wardrobe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.wardrobe{grid-template-columns:1fr}}
+.wcol{border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.wcol h3{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.wcol .none{font-size:13px;color:var(--muted)}
+.gmark{width:10px;height:10px;border-radius:3px;flex:none}
+.g-m{background:#2F5FA8}.g-f{background:#C8374A}.g-u{background:#7A8699}
+.witem{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;text-align:left;display:grid;gap:1px;min-height:44px}
+.witem:hover{border-color:var(--muted)}
+.witem[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.witem b{font-size:14px;line-height:1.35}
+.witem small{font-size:12px;color:var(--muted);line-height:1.35}
+.inq{padding:14px 16px;display:grid;gap:12px}
+.inq-sum{font-family:var(--f-disp);font-size:20px;font-weight:700;line-height:1.45;background:var(--surface2);border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+.inq-sum .ph{color:var(--muted);font-weight:400;font-family:var(--f-body);font-size:15px}
+.inq-sum small{display:block;font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.cta .btn.primary{flex:0 1 auto;padding:0 22px}
+.stock-note{font-size:12px;color:var(--warn);border:1px dashed var(--warn);border-radius:6px;padding:2px 8px}
+.sizefree{height:40px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);padding:0 14px;font-size:15px;width:9.5em}
+.size-chip{gap:8px}
+.size-chip small{font-size:11px;opacity:.75;margin-left:4px}
+.sdot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.sdot.none{background:transparent;border:1.5px dashed var(--muted);box-shadow:none}
+.chart-name{font-size:10px;letter-spacing:0;font-weight:400;color:var(--muted)}
+.start{display:grid;gap:6px;padding:18px 4px}
+.start b{font-family:var(--f-disp);font-size:20px}
+.start span{color:var(--muted);font-size:14px}
+.school .pf{display:block;font-size:11px;font-weight:400;color:var(--muted);line-height:1.3}
+.sc-head h2 .pf{display:block;font-size:13px;font-weight:700;color:var(--muted);font-family:var(--f-body)}
+@media (max-width:520px){.brand span{display:none}.brand h1{font-size:17px}}
+.count-note{font-size:12px;color:var(--muted)}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="brand"><h1>さくらや 問い合わせ手帳</h1><span>電話を受けながら、タップで聞き取り</span></div>
+  <button class="memo-btn" id="openMemo">通話メモ <span class="cnt num" id="memoCount">0</span></button>
+</header>
+
+<main class="app">
+  <section class="panel picker" id="picker">
+    <div class="picker-head">
+      <span class="label">1　学校をえらぶ</span>
+      <span class="cur" id="curSchool"></span>
+      <button class="toggle-list" id="toggleList">変更</button>
+    </div>
+    <div class="picker-body">
+      <input class="search" id="q" type="search" placeholder="学校名・よみで検索（例：じょうけん、さかいで）" autocomplete="off">
+      <div class="chips kind-chips" id="kindChips"></div>
+      <div class="chips area-chips" id="areaChips"></div>
+      <div class="school-list" id="schoolList"></div>
+      <span class="count-note" id="countNote"></span>
+    </div>
+  </section>
+
+  <section class="detail">
+    <div class="panel school-card" id="schoolCard"></div>
+    <div class="panel filters" id="filters"></div>
+    <div class="panel inq" id="inquiry"></div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="sheet" id="sheet" hidden aria-label="通話メモ">
+  <div class="sheet-head"><h2>通話メモ</h2><button class="x" id="closeMemo" aria-label="閉じる">×</button></div>
+  <div class="field"><span class="label">問い合わせ内容（自動）</span><textarea id="memoSummary" rows="3"></textarea></div>
+  <div class="two">
+    <div class="field"><label class="label" for="memoName">お名前</label><input id="memoName" autocomplete="off"></div>
+    <div class="field"><label class="label" for="memoTel">電話番号</label><input id="memoTel" inputmode="tel" autocomplete="off"></div>
+  </div>
+  <div class="two">
+    <div class="field"><label class="label" for="memoKind">用件</label>
+      <select id="memoKind"><option>在庫確認</option><option>取り置き</option><option>入荷連絡の希望</option><option>買取の相談</option><option>その他</option></select></div>
+    <div class="field"><span class="label">折り返し</span><label class="switch"><input type="checkbox" id="memoCb"> 折り返しが必要</label></div>
+  </div>
+  <div class="field"><label class="label" for="memoNote">メモ</label><textarea id="memoNote" placeholder="例：3月中に来店予定。身長158cm"></textarea></div>
+  <div class="btnrow"><button class="btn primary" id="saveMemo">メモを保存</button><button class="btn" id="copyMemo">全件コピー</button></div>
+  <span class="label">保存したメモ（この端末のみ）</span>
+  <div class="logs" id="logs"></div>
+</aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============ 取扱い校データ（香川県の学校一覧＋さくらや記入分から生成） ============ */
+const SCHOOLS = [{"id": "s89", "name": "あおやま保育園", "short": "あおやま保育園", "kana": "あおやまほいくえん", "area": "中讃", "city": "宇多津町", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "あおやま保育園", "pref": "私立", "full": "あおやま保育園"}, {"id": "s90", "name": "青山幼稚園", "short": "青山幼稚園", "kana": "あおやまようちえん", "area": "中讃", "city": "宇多津町", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "青山幼稚園", "pref": "私立", "full": "青山幼稚園"}, {"id": "s144", "name": "麻小学校", "short": "麻小", "kana": "あさ", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）／体操服", "disp": "三豊市立麻小学校", "pref": "三豊市立", "full": "麻小学校"}, {"id": "s32", "name": "綾歌中学校", "short": "綾歌中", "kana": "あやうた", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "丸亀市立綾歌中学校", "pref": "丸亀市立", "full": "綾歌中学校"}, {"id": "s99", "name": "綾上小学校", "short": "綾上小", "kana": "あやかみ", "area": "中讃", "city": "綾川町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 白3本／袖 白3本", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["元メモ", "鉛筆メモ「セーラー 白3×3（リボンは○○小と同じ）」。○○小の部分は判読できず"]], "memo": "", "disp": "綾川町立綾上小学校", "pref": "綾川町立", "full": "綾上小学校"}, {"id": "s104", "name": "綾川中学校", "short": "綾川中", "kana": "あやがわ", "area": "中讃", "city": "綾川町", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "綾川町立綾川中学校", "pref": "綾川町立", "full": "綾川中学校"}, {"id": "s131", "name": "粟井小学校", "short": "粟井小", "kana": "あわい", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）／体操服", "disp": "観音寺市立粟井小学校", "pref": "観音寺市立", "full": "粟井小学校"}, {"id": "s22", "name": "飯野小学校", "short": "飯野小", "kana": "いいの", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 緑2本／袖なし", "v": ["冬"]}, {"n": "ネクタイ・リボン", "g": "女", "d": "マーク有", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー緑2:0（冬）／体操服", "disp": "丸亀市立飯野小学校", "pref": "丸亀市立", "full": "飯野小学校"}, {"id": "s132", "name": "一ノ谷小学校", "short": "一ノ谷小", "kana": "いちのたに", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（ダブル）／体操服", "disp": "観音寺市立一ノ谷小学校", "pref": "観音寺市立", "full": "一ノ谷小学校"}, {"id": "s137", "name": "伊吹中学校", "short": "伊吹中", "kana": "いぶき", "area": "西讃", "city": "観音寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート", "disp": "観音寺市立伊吹中学校", "pref": "観音寺市立", "full": "伊吹中学校"}, {"id": "s95", "name": "宇多津小学校", "short": "宇多津小", "kana": "うたづ", "area": "中讃", "city": "宇多津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖 白3", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:3（冬）／体操服", "disp": "宇多津町立宇多津小学校", "pref": "宇多津町立", "full": "宇多津小学校"}, {"id": "s97", "name": "宇多津中学校", "short": "宇多津中", "kana": "うたづ", "area": "中讃", "city": "宇多津町", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏", "合"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏・合）", "disp": "宇多津町立宇多津中学校", "pref": "宇多津町立", "full": "宇多津中学校"}, {"id": "s96", "name": "宇多津北小学校", "short": "宇多津北小", "kana": "うたづきた", "area": "中讃", "city": "宇多津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖 白3", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:3（冬）／体操服", "disp": "宇多津町立宇多津北小学校", "pref": "宇多津町立", "full": "宇多津北小学校"}, {"id": "s94", "name": "宇多津幼稚園", "short": "宇多津幼稚園", "kana": "うたづようちえん", "area": "中讃", "city": "宇多津町", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "宇多津町立宇多津幼稚園", "pref": "宇多津町立", "full": "宇多津幼稚園"}, {"id": "s6", "name": "英明高等学校", "short": "英明高", "kana": "えいめい", "area": "高松", "city": "高松市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "半袖シャツ", "g": "男", "d": "", "v": ["カッター", "カジュアル", "ポロ"]}, {"n": "長袖シャツ", "g": "男", "d": "", "v": ["カッター", "ブルー"]}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ズボン（夏・冬）／半袖（カッター・カジュアル・ポロ）・長袖（カッター・ブルー）〈女子〉スカート（夏・冬）", "disp": "英明高等学校", "pref": "私立", "full": "英明高等学校"}, {"id": "s43", "name": "江尻保育所", "short": "江尻保育所", "kana": "えじりほいくしょ", "area": "中讃", "city": "坂出市", "kind": "保育所", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出市立江尻保育所", "pref": "坂出市立", "full": "江尻保育所"}, {"id": "s116", "name": "榎井小学校", "short": "榎井小", "kana": "えない", "area": "中讃", "city": "琴平町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 緑1本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー緑1:0（冬）／体操服", "disp": "琴平町立榎井小学校", "pref": "琴平町立", "full": "榎井小学校"}, {"id": "s7", "name": "大手前高松高等学校", "short": "大手前高松高", "kana": "おおてまえたかまつ", "area": "高松", "city": "高松市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "共", "d": "", "v": ["紺", "グレー"]}, {"n": "ジャケット", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ブラウス", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ウインドブレーカー", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン（夏・冬）／ベスト（紺）　〈女子〉ジャケット／スカート（夏・冬）／ブラウス（夏・冬）／ベスト（紺・グレー）〈兼用〉ウインドブレーカー", "disp": "大手前高松高等学校", "pref": "私立", "full": "大手前高松高等学校"}, {"id": "s34", "name": "大手前丸亀中学校", "short": "大手前丸亀中", "kana": "おおてまえまるがめ", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "私立", "level": "sec", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "大手前丸亀中学校", "pref": "私立", "full": "大手前丸亀中学校"}, {"id": "s39", "name": "大手前丸亀高等学校", "short": "大手前丸亀高", "kana": "おおてまえまるがめ", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "共", "d": "", "v": ["紺", "グレー"]}, {"n": "ジャケット", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ブラウス", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ウインドブレーカー", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン（夏・冬）／ベスト（紺）　〈女子〉ジャケット／スカート（夏・冬）／ブラウス（夏・冬）／ベスト（紺・グレー）〈兼用〉ウインドブレーカー", "disp": "大手前丸亀高等学校", "pref": "私立", "full": "大手前丸亀高等学校"}, {"id": "s133", "name": "大野原小学校", "short": "大野原小", "kana": "おおのはら", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "スカート", "g": "女", "d": "", "v": ["冬"]}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート（冬）／ズボン／体操服", "disp": "観音寺市立大野原小学校", "pref": "観音寺市立", "full": "大野原小学校"}, {"id": "s138", "name": "大野原中学校", "short": "大野原中", "kana": "おおのはら", "area": "西讃", "city": "観音寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー", "disp": "観音寺市立大野原中学校", "pref": "観音寺市立", "full": "大野原中学校"}, {"id": "s147", "name": "大見小学校", "short": "大見小", "kana": "おおみ", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "三豊市立大見小学校", "pref": "三豊市立", "full": "大見小学校"}, {"id": "s26", "name": "岡田小学校", "short": "岡田小", "kana": "おかだ", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（詰襟）", "g": "男", "d": "標準・黒", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "ブレザー", "g": "女", "d": "リボン付", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": ["半", "トレ"]}], "notes": [], "memo": "学ラン（縦襟）／ブレザー（シングル）／体操服（半・トレ）", "disp": "丸亀市立岡田小学校", "pref": "丸亀市立", "full": "岡田小学校"}, {"id": "s159", "name": "香川高等専門学校", "short": "香川高等専門学校", "kana": "かがわこうとうせんもんがっこう", "area": "高松", "city": "高松市", "kind": "高専", "kubun": null, "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "共", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["確認", "高松キャンパス（高松市）と詫間キャンパス（三豊市）がある。どちらの制服か確認する"]], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ　〈女子〉ブレザー／ズボン（冬）／スカート（夏・冬）／半袖・長袖シャツ", "disp": "香川高等専門学校", "pref": "国立", "full": "香川高等専門学校"}, {"id": "s142", "name": "香川県立香川西部支援学校", "short": "香川西部支援学校", "kana": "かがわせいぶしえんがっこう", "area": "西讃", "city": "観音寺市", "kind": "特別支援学校", "kubun": "公立", "level": "sp", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川県立香川西部支援学校", "pref": "香川県立", "full": "香川西部支援学校"}, {"id": "s4", "name": "香川誠陵中学校", "short": "香川誠陵中", "kana": "かがわせいりょう", "area": "高松", "city": "高松市", "kind": "中学校", "kubun": "私立", "level": "sec", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川誠陵中学校", "pref": "私立", "full": "香川誠陵中学校"}, {"id": "s8", "name": "香川誠陵高等学校", "short": "香川誠陵高", "kana": "かがわせいりょう", "area": "高松", "city": "高松市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "半袖シャツ", "g": "男", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "共", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "女", "d": "", "v": ["半袖", "長袖"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖シャツ　〈女子〉ブレザー／スカート（夏・冬）／ベスト／半袖・長袖シャツ　〈兼用〉ベスト（夏・冬）", "disp": "香川誠陵高等学校", "pref": "私立", "full": "香川誠陵高等学校"}, {"id": "s91", "name": "認定こども園香川短期大学附属幼稚園", "short": "香川短期大学附属幼稚園", "kana": "かがわたんきだいがくふぞくようちえん", "area": "中讃", "city": "宇多津町", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "認定こども園香川短期大学附属幼稚園", "pref": "私立・認定こども園", "full": "香川短期大学附属幼稚園"}, {"id": "s158", "name": "四国学院大学香川西高等学校", "short": "香川西高", "kana": "かがわにし", "area": "西讃", "city": "三豊市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "男", "d": "", "v": ["半袖", "長袖"]}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "半袖シャツ", "g": "女", "d": "", "v": []}, {"n": "ポロ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "カーディガン", "g": "共", "d": "", "v": []}, {"n": "セーター", "g": "共", "d": "", "v": []}, {"n": "ベスト", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ　〈女子〉ブレザー／スカート（夏・冬）／半袖シャツ　〈兼用〉半袖ポロ・長袖ポロ／カーディガン／セーター／ベスト", "disp": "四国学院大学香川西高等学校", "pref": "私立・四国学院大学", "full": "香川西高等学校"}, {"id": "s42", "name": "香川県立香川丸亀支援学校", "short": "香川丸亀支援学校", "kana": "かがわまるがめしえんがっこう", "area": "中讃", "city": "丸亀市", "kind": "特別支援学校", "kubun": "公立", "level": "sp", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川県立香川丸亀支援学校", "pref": "香川県立", "full": "香川丸亀支援学校"}, {"id": "s156", "name": "笠田高等学校", "short": "笠田高", "kana": "かさだ", "area": "西讃", "city": "三豊市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー／ズボン（夏・冬）／半袖・長袖シャツ", "disp": "香川県立笠田高等学校", "pref": "香川県立", "full": "笠田高等学校"}, {"id": "s53", "name": "金山小学校", "short": "金山小", "kana": "かなやま", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・紺", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "ブレザー（ダブル）／体操服", "disp": "坂出市立金山小学校", "pref": "坂出市立", "full": "金山小学校"}, {"id": "s56", "name": "加茂小学校", "short": "加茂小", "kana": "かも", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖 白2", "v": ["冬"]}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー（冬）／体操服", "disp": "坂出市立加茂小学校", "pref": "坂出市立", "full": "加茂小学校"}, {"id": "s58", "name": "川津小学校", "short": "川津小", "kana": "かわつ", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー3:0（冬）／体操服", "disp": "坂出市立川津小学校", "pref": "坂出市立", "full": "川津小学校"}, {"id": "s45", "name": "幼保連携型認定こども園川津こども園", "short": "川津こども園", "kana": "かわつこどもえん", "area": "中讃", "city": "坂出市", "kind": "認定こども園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出市立幼保連携型認定こども園川津こども園", "pref": "坂出市立・幼保連携型認定こども園", "full": "川津こども園"}, {"id": "s135", "name": "観音寺中学校", "short": "観音寺中", "kana": "かんおんじ", "area": "西讃", "city": "観音寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー", "disp": "観音寺市立観音寺中学校", "pref": "観音寺市立", "full": "観音寺中学校"}, {"id": "s141", "name": "観音寺総合高等学校", "short": "観音寺総合高", "kana": "かんおんじそうごう", "area": "西讃", "city": "観音寺市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "ネクタイ", "g": "男", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "女", "d": "", "v": []}, {"n": "リボン", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ／ネクタイ　〈女子〉ブレザー／スカート（夏・冬）／ベスト／半袖・長袖シャツ／リボン", "disp": "香川県立観音寺総合高等学校", "pref": "香川県立", "full": "観音寺総合高等学校"}, {"id": "s140", "name": "観音寺第一高等学校", "short": "観音寺第一高", "kana": "かんおんじだいいち", "area": "西讃", "city": "観音寺市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "共", "d": "", "v": []}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉〈女子〉ブレザー／スカート（夏・冬）／ベスト／半袖・長袖シャツ", "disp": "香川県立観音寺第一高等学校", "pref": "香川県立", "full": "観音寺第一高等学校"}, {"id": "s25", "name": "栗熊小学校", "short": "栗熊小", "kana": "くりくま", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ポロシャツ", "g": "男", "d": "白", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "丸亀市立栗熊小学校", "pref": "丸亀市立", "full": "栗熊小学校"}, {"id": "s128", "name": "くれよん認定こども園", "short": "くれよん", "kana": "くれよんこどもえん", "area": "西讃", "city": "観音寺市", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "くれよん認定こども園", "pref": "私立", "full": "くれよん認定こども園"}, {"id": "s21", "name": "郡家小学校", "short": "郡家小", "kana": "ぐんげ", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖 白3", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:3（冬）／体操服", "disp": "丸亀市立郡家小学校", "pref": "丸亀市立", "full": "郡家小学校"}, {"id": "s9", "name": "虎岳保育園", "short": "虎岳保育園", "kana": "こがくほいくえん", "area": "中讃", "city": "丸亀市", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "虎岳保育園", "pref": "私立", "full": "虎岳保育園"}, {"id": "s3", "name": "国分寺南部小学校", "short": "国分寺南部小", "kana": "こくぶんじなんぶ", "area": "高松", "city": "高松市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（ダブル）／体操服", "disp": "高松市立国分寺南部小学校", "pref": "高松市立", "full": "国分寺南部小学校"}, {"id": "s2", "name": "国分寺北部小学校", "short": "国分寺北部小", "kana": "こくぶんじほくぶ", "area": "高松", "city": "高松市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（ダブル）", "disp": "高松市立国分寺北部小学校", "pref": "高松市立", "full": "国分寺北部小学校"}, {"id": "s121", "name": "琴南小学校", "short": "琴南小", "kana": "ことなみ", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0", "disp": "まんのう町立琴南小学校", "pref": "まんのう町立", "full": "琴南小学校"}, {"id": "s115", "name": "琴平小学校", "short": "琴平小", "kana": "ことひら", "area": "中讃", "city": "琴平町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0", "disp": "琴平町立琴平小学校", "pref": "琴平町立", "full": "琴平小学校"}, {"id": "s118", "name": "琴平中学校", "short": "琴平中", "kana": "ことひら", "area": "中讃", "city": "琴平町", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "合"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・合）", "disp": "琴平町立琴平中学校", "pref": "琴平町立", "full": "琴平中学校"}, {"id": "s119", "name": "琴平高等学校", "short": "琴平高", "kana": "ことひら", "area": "中讃", "city": "琴平町", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "ベスト", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン／半袖・長袖　〈女子〉ブレザー／ベスト／半袖・長袖／体操服", "disp": "香川県立琴平高等学校", "pref": "香川県立", "full": "琴平高等学校"}, {"id": "s150", "name": "財田小学校", "short": "財田小", "kana": "さいた", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "三豊市立財田小学校", "pref": "三豊市立", "full": "財田小学校"}, {"id": "s51", "name": "坂出小学校", "short": "坂出小", "kana": "さかいで", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "男", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白太1本+白細1本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー（冬）／体操服", "disp": "坂出市立坂出小学校", "pref": "坂出市立", "full": "坂出小学校"}, {"id": "s61", "name": "坂出中学校", "short": "坂出中", "kana": "さかいで", "area": "中讃", "city": "坂出市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "坂出市立坂出中学校", "pref": "坂出市立", "full": "坂出中学校"}, {"id": "s66", "name": "坂出高等学校", "short": "坂出高", "kana": "さかいで", "area": "中讃", "city": "坂出市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン（夏・冬）　〈女子〉セーラー／スカート（夏・冬）", "disp": "香川県立坂出高等学校", "pref": "香川県立", "full": "坂出高等学校"}, {"id": "s46", "name": "坂出一高幼稚園", "short": "坂出一高幼稚園", "kana": "さかいでいちこうようちえん", "area": "中讃", "city": "坂出市", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出一高幼稚園", "pref": "私立", "full": "坂出一高幼稚園"}, {"id": "s67", "name": "坂出工業高等学校", "short": "坂出工業高", "kana": "さかいでこうぎょう", "area": "中讃", "city": "坂出市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "半袖シャツ", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン／半袖シャツ", "disp": "香川県立坂出工業高等学校", "pref": "香川県立", "full": "坂出工業高等学校"}, {"id": "s65", "name": "坂出商業高等学校", "short": "坂出商業高", "kana": "さかいでしょうぎょう", "area": "中讃", "city": "坂出市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "ブレザー", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "女", "d": "", "v": []}, {"n": "セーター", "g": "女", "d": "", "v": []}, {"n": "シャツ", "g": "女", "d": "", "v": ["半袖", "長袖"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン　〈女子〉ブレザー／スカート（夏・冬）／ベスト／セーター／半袖・長袖シャツ／", "disp": "香川県立坂出商業高等学校", "pref": "香川県立", "full": "坂出商業高等学校"}, {"id": "s68", "name": "坂出第一高等学校", "short": "坂出第一高", "kana": "さかいでだいいち", "area": "中讃", "city": "坂出市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "半袖ポロ", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "シャツ", "g": "女", "d": "", "v": ["半袖", "長袖"]}], "notes": [], "memo": "〈男子〉ブレザー／ズボン／半袖ポロ／体操服　〈女子〉ブレザー／スカート／半袖・長袖シャツ／体操服", "disp": "坂出第一高等学校", "pref": "私立", "full": "坂出第一高等学校"}, {"id": "s49", "name": "坂出中央幼稚園", "short": "坂出中央幼稚園", "kana": "さかいでちゅうおうようちえん", "area": "中讃", "city": "坂出市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出市立坂出中央幼稚園", "pref": "坂出市立", "full": "坂出中央幼稚園"}, {"id": "s109", "name": "四箇小学校", "short": "四箇小", "kana": "しか", "area": "中讃", "city": "多度津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白1本／後ろクロス2", "v": ["冬"]}, {"n": "ネクタイ", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー1:0（冬）／体操服", "disp": "多度津町立四箇小学校", "pref": "多度津町立", "full": "四箇小学校"}, {"id": "s108", "name": "四箇幼稚園", "short": "四箇幼稚園", "kana": "しかようちえん", "area": "中讃", "city": "多度津町", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "多度津町立四箇幼稚園", "pref": "多度津町立", "full": "四箇幼稚園"}, {"id": "s123", "name": "四条小学校", "short": "四条小", "kana": "しじょう", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 青2本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー青2:0（冬）／体操服", "disp": "まんのう町立四条小学校", "pref": "まんのう町立", "full": "四条小学校"}, {"id": "s1", "name": "志度中学校", "short": "志度中", "kana": "しど", "area": "東讃", "city": "さぬき市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["メモ", "制服アリ"]], "memo": "制服アリ", "disp": "さぬき市立志度中学校", "pref": "さぬき市立", "full": "志度中学校"}, {"id": "s146", "name": "下高瀬小学校", "short": "下高瀬小", "kana": "しもたかせ", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服（男女兼用）", "g": "共", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "兼用（冬）", "disp": "三豊市立下高瀬小学校", "pref": "三豊市立", "full": "下高瀬小学校"}, {"id": "s100", "name": "昭和小学校", "short": "昭和小", "kana": "しょうわ", "area": "中讃", "city": "綾川町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["元メモ", "鉛筆メモでは「イートン(S)」（シングルのイートン型）"]], "memo": "ブレザー（シングル）／体操服", "disp": "綾川町立昭和小学校", "pref": "綾川町立", "full": "昭和小学校"}, {"id": "s98", "name": "綾川町立昭和こども園", "short": "昭和こども園", "kana": "しょうわこどもえん", "area": "中讃", "city": "綾川町", "kind": "認定こども園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "綾川町立昭和こども園", "pref": "綾川町立", "full": "昭和こども園"}, {"id": "s110", "name": "白方小学校", "short": "白方小", "kana": "しらかた", "area": "中讃", "city": "多度津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": []}, {"n": "ネクタイ", "g": "女", "d": "▽エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "多度津町立白方小学校", "pref": "多度津町立", "full": "白方小学校"}, {"id": "s106", "name": "白方保育所", "short": "白方保育所", "kana": "しらかたほいくしょ", "area": "中讃", "city": "多度津町", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "白方保育所", "pref": "私立", "full": "白方保育所"}, {"id": "s63", "name": "白峰中学校", "short": "白峰中", "kana": "しらみね", "area": "中讃", "city": "坂出市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "坂出市立白峰中学校", "pref": "坂出市立", "full": "白峰中学校"}, {"id": "s13", "name": "城乾小学校", "short": "城乾小", "kana": "じょうけん", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 緑3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "緑", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー緑3:0（冬）／体操服", "disp": "丸亀市立城乾小学校", "pref": "丸亀市立", "full": "城乾小学校"}, {"id": "s14", "name": "城坤小学校", "short": "城坤小", "kana": "じょうこん", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 青3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "紺", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー青3:0（冬）／体操服", "disp": "丸亀市立城坤小学校", "pref": "丸亀市立", "full": "城坤小学校"}, {"id": "s19", "name": "城辰小学校", "short": "城辰小", "kana": "じょうしん", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・紺", "v": []}, {"n": "スカート", "g": "女", "d": "変形", "v": ["夏", "冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（ダブル）／スカート（夏・冬）／体操服", "disp": "丸亀市立城辰小学校", "pref": "丸亀市立", "full": "城辰小学校"}, {"id": "s16", "name": "城西小学校", "short": "城西小", "kana": "じょうせい", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "赤", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤3:0（冬）／体操服", "disp": "丸亀市立城西小学校", "pref": "丸亀市立", "full": "城西小学校"}, {"id": "s18", "name": "城東小学校", "short": "城東小", "kana": "じょうとう", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "長・赤", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）／体操服", "disp": "丸亀市立城東小学校", "pref": "丸亀市立", "full": "城東小学校"}, {"id": "s17", "name": "城南小学校", "short": "城南小", "kana": "じょうなん", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "黄", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー2:0（冬）／体操服", "disp": "丸亀市立城南小学校", "pref": "丸亀市立", "full": "城南小学校"}, {"id": "s15", "name": "城北小学校", "short": "城北小", "kana": "じょうほく", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "紺", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー2:0（冬）／体操服", "disp": "丸亀市立城北小学校", "pref": "丸亀市立", "full": "城北小学校"}, {"id": "s87", "name": "尽誠学園高等学校", "short": "尽誠学園高", "kana": "じんせいがくえん", "area": "中讃", "city": "善通寺市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "共", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／ベスト　〈女子〉ブレザー／スカート（夏・冬）／ベスト", "disp": "尽誠学園高等学校", "pref": "私立", "full": "尽誠学園高等学校"}, {"id": "s101", "name": "陶小学校", "short": "陶小", "kana": "すえ", "area": "中讃", "city": "綾川町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["元メモ", "鉛筆メモ「リボンは○○小と同じ」。○○小の部分は判読できず"]], "memo": "セーラー赤2:0（冬）", "disp": "綾川町立陶小学校", "pref": "綾川町立", "full": "陶小学校"}, {"id": "s77", "name": "西部小学校", "short": "西部小", "kana": "せいぶ", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖なし", "v": []}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー2:0", "disp": "善通寺市立西部小学校", "pref": "善通寺市立", "full": "西部小学校"}, {"id": "s88", "name": "香川県立善通寺支援学校", "short": "善通寺支援学校", "kana": "ぜんつうじしえんがっこう", "area": "中讃", "city": "善通寺市", "kind": "特別支援学校", "kubun": "公立", "level": "sp", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川県立善通寺支援学校", "pref": "香川県立", "full": "善通寺支援学校"}, {"id": "s75", "name": "善通寺聖母幼稚園", "short": "善通寺聖母幼稚園", "kana": "ぜんつうじせいぼようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺聖母幼稚園", "pref": "私立", "full": "善通寺聖母幼稚園"}, {"id": "s86", "name": "善通寺第一高等学校", "short": "善通寺第一高", "kana": "ぜんつうじだいいち", "area": "中讃", "city": "善通寺市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "共", "d": "指定", "v": ["半袖", "長袖"]}, {"n": "ブレザー", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "女", "d": "", "v": ["布", "ニット"]}, {"n": "カーディガン", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン（夏・冬）／シャツ（指定）〈女子〉ブレザー／シャツ（［指定］半袖・長袖）／スカート（夏・冬）／ベスト（布・ニット）／カーディガン", "disp": "香川県立善通寺第一高等学校", "pref": "香川県立", "full": "善通寺第一高等学校"}, {"id": "s117", "name": "象郷小学校", "short": "象郷小", "kana": "ぞうごう", "area": "中讃", "city": "琴平町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0（冬）", "disp": "琴平町立象郷小学校", "pref": "琴平町立", "full": "象郷小学校"}, {"id": "s122", "name": "高篠小学校", "short": "高篠小", "kana": "たかしの", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 2本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー2:0（冬）／体操服", "disp": "まんのう町立高篠小学校", "pref": "まんのう町立", "full": "高篠小学校"}, {"id": "s151", "name": "高瀬中学校", "short": "高瀬中", "kana": "たかせ", "area": "西讃", "city": "三豊市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー", "disp": "三豊市立高瀬中学校", "pref": "三豊市立", "full": "高瀬中学校"}, {"id": "s157", "name": "高瀬高等学校", "short": "高瀬高", "kana": "たかせ", "area": "西讃", "city": "三豊市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "男", "d": "", "v": ["半袖", "長袖"]}, {"n": "ベスト", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ／ベスト　〈女子〉", "disp": "香川県立高瀬高等学校", "pref": "香川県立", "full": "高瀬高等学校"}, {"id": "s5", "name": "高松中央高等学校", "short": "高松中央高", "kana": "たかまつちゅうおう", "area": "高松", "city": "高松市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "セーター", "g": "共", "d": "", "v": []}, {"n": "シャツ", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー／セーター／シャツ", "disp": "高松中央高等学校", "pref": "私立", "full": "高松中央高等学校"}, {"id": "s102", "name": "滝宮小学校", "short": "滝宮小", "kana": "たきのみや", "area": "中讃", "city": "綾川町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "ダブル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（ダブル）／体操服", "disp": "綾川町立滝宮小学校", "pref": "綾川町立", "full": "滝宮小学校"}, {"id": "s148", "name": "詫間小学校", "short": "詫間小", "kana": "たくま", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "三豊市立詫間小学校", "pref": "三豊市立", "full": "詫間小学校"}, {"id": "s153", "name": "詫間中学校", "short": "詫間中", "kana": "たくま", "area": "西讃", "city": "三豊市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート", "disp": "三豊市立詫間中学校", "pref": "三豊市立", "full": "詫間中学校"}, {"id": "s81", "name": "竜川小学校", "short": "竜川小", "kana": "たつかわ", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": []}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0", "disp": "善通寺市立竜川小学校", "pref": "善通寺市立", "full": "竜川小学校"}, {"id": "s72", "name": "竜川幼稚園", "short": "竜川幼稚園", "kana": "たつかわようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺市立竜川幼稚園", "pref": "善通寺市立", "full": "竜川幼稚園"}, {"id": "s112", "name": "多度津小学校", "short": "多度津小", "kana": "たどつ", "area": "中讃", "city": "多度津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤1本／後ろクロス", "v": ["冬"]}, {"n": "ネクタイ", "g": "女", "d": "赤の▽タイプ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤1:0（冬）", "disp": "多度津町立多度津小学校", "pref": "多度津町立", "full": "多度津小学校"}, {"id": "s113", "name": "多度津中学校", "short": "多度津中", "kana": "たどつ", "area": "中讃", "city": "多度津町", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏）／体操服", "disp": "多度津町立多度津中学校", "pref": "多度津町立", "full": "多度津中学校"}, {"id": "s114", "name": "多度津高等学校", "short": "多度津高", "kana": "たどつ", "area": "中讃", "city": "多度津町", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "シャツ", "g": "男", "d": "", "v": ["半袖", "長袖"]}, {"n": "ベスト", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン／半袖・長袖シャツ　〈兼用〉ベスト", "disp": "香川県立多度津高等学校", "pref": "香川県立", "full": "多度津高等学校"}, {"id": "s107", "name": "多度津幼稚園", "short": "多度津幼稚園", "kana": "たどつようちえん", "area": "中讃", "city": "多度津町", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "多度津町立多度津幼稚園", "pref": "多度津町立", "full": "多度津幼稚園"}, {"id": "s23", "name": "垂水小学校", "short": "垂水小", "kana": "たるみ", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:0（冬）", "disp": "丸亀市立垂水小学校", "pref": "丸亀市立", "full": "垂水小学校"}, {"id": "s76", "name": "中央小学校", "short": "中央小", "kana": "ちゅうおう", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": ["冬"]}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0（冬）／体操服", "disp": "善通寺市立中央小学校", "pref": "善通寺市立", "full": "中央小学校"}, {"id": "s70", "name": "中央幼稚園", "short": "中央幼稚園", "kana": "ちゅうおうようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺市立中央幼稚園", "pref": "善通寺市立", "full": "中央幼稚園"}, {"id": "s126", "name": "仲南小学校", "short": "仲南小", "kana": "ちゅうなん", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "まんのう町立仲南小学校", "pref": "まんのう町立", "full": "仲南小学校"}, {"id": "s136", "name": "中部中学校", "short": "中部中", "kana": "ちゅうぶ", "area": "西讃", "city": "観音寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー", "disp": "観音寺市立中部中学校", "pref": "観音寺市立", "full": "中部中学校"}, {"id": "s79", "name": "東部小学校", "short": "東部小", "kana": "とうぶ", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤1本／袖なし", "v": ["冬"]}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤1:0（冬）", "disp": "善通寺市立東部小学校", "pref": "善通寺市立", "full": "東部小学校"}, {"id": "s52", "name": "東部小学校", "short": "東部小", "kana": "とうぶ", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "ポロシャツ", "g": "女", "d": "白", "v": []}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー3:0（冬）", "disp": "坂出市立東部小学校", "pref": "坂出市立", "full": "東部小学校"}, {"id": "s62", "name": "東部中学校", "short": "東部中", "kana": "とうぶ", "area": "中讃", "city": "坂出市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "坂出市立東部中学校", "pref": "坂出市立", "full": "東部中学校"}, {"id": "s71", "name": "東部幼稚園", "short": "東部幼稚園", "kana": "とうぶようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺市立東部幼稚園", "pref": "善通寺市立", "full": "東部幼稚園"}, {"id": "s129", "name": "常磐小学校", "short": "常磐小", "kana": "ときわ", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）", "disp": "観音寺市立常磐小学校", "pref": "観音寺市立", "full": "常磐小学校"}, {"id": "s24", "name": "富熊小学校", "short": "富熊小", "kana": "とみくま", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:0（冬）", "disp": "丸亀市立富熊小学校", "pref": "丸亀市立", "full": "富熊小学校"}, {"id": "s130", "name": "豊田小学校", "short": "豊田小", "kana": "とよた", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "観音寺市立豊田小学校", "pref": "観音寺市立", "full": "豊田小学校"}, {"id": "s134", "name": "豊浜小学校", "short": "豊浜小", "kana": "とよはま", "area": "西讃", "city": "観音寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "観音寺市立豊浜小学校", "pref": "観音寺市立", "full": "豊浜小学校"}, {"id": "s139", "name": "豊浜中学校", "short": "豊浜中", "kana": "とよはま", "area": "西讃", "city": "観音寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー", "disp": "観音寺市立豊浜中学校", "pref": "観音寺市立", "full": "豊浜中学校"}, {"id": "s111", "name": "豊原小学校", "short": "豊原小", "kana": "とよはら", "area": "中讃", "city": "多度津町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": ["冬"]}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤2:0（冬）", "disp": "多度津町立豊原小学校", "pref": "多度津町立", "full": "豊原小学校"}, {"id": "s105", "name": "豊原保育所", "short": "豊原保育所", "kana": "とよはらほいくしょ", "area": "中讃", "city": "多度津町", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "豊原保育所", "pref": "私立", "full": "豊原保育所"}, {"id": "s12", "name": "ドルカスこども園", "short": "ドルカスこども園", "kana": "どるかすこどもえん", "area": "中讃", "city": "丸亀市", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "ドルカスこども園", "pref": "私立", "full": "ドルカスこども園"}, {"id": "s125", "name": "長炭小学校", "short": "長炭小", "kana": "ながすみ", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 緑1本／袖なし", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー緑1:0（冬）／体操服", "disp": "まんのう町立長炭小学校", "pref": "まんのう町立", "full": "長炭小学校"}, {"id": "s78", "name": "南部小学校", "short": "南部小", "kana": "なんぶ", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "紺", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）／体操服", "disp": "善通寺市立南部小学校", "pref": "善通寺市立", "full": "南部小学校"}, {"id": "s149", "name": "仁尾小学校", "short": "仁尾小", "kana": "にお", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "三豊市立仁尾小学校", "pref": "三豊市立", "full": "仁尾小学校"}, {"id": "s154", "name": "仁尾中学校", "short": "仁尾中", "kana": "にお", "area": "西讃", "city": "三豊市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "セーラー", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー／セーラー／スカート／体操服", "disp": "三豊市立仁尾中学校", "pref": "三豊市立", "full": "仁尾中学校"}, {"id": "s30", "name": "西中学校", "short": "西中", "kana": "にし", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": ["夏", "冬"]}], "notes": [], "memo": "セーラー（冬・夏）", "disp": "丸亀市立西中学校", "pref": "丸亀市立", "full": "西中学校"}, {"id": "s84", "name": "西中学校", "short": "西中", "kana": "にし", "area": "中讃", "city": "善通寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏）", "disp": "善通寺市立西中学校", "pref": "善通寺市立", "full": "西中学校"}, {"id": "s54", "name": "西庄小学校", "short": "西庄小", "kana": "にしのしょう", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖 白2", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー（冬）／体操服", "disp": "坂出市立西庄小学校", "pref": "坂出市立", "full": "西庄小学校"}, {"id": "s55", "name": "林田小学校", "short": "林田小", "kana": "はやしだ", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "ポロシャツ", "g": "女", "d": "白", "v": []}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー3:0（冬）", "disp": "坂出市立林田小学校", "pref": "坂出市立", "full": "林田小学校"}, {"id": "s48", "name": "林田幼稚園", "short": "林田幼稚園", "kana": "はやしだようちえん", "area": "中讃", "city": "坂出市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出市立林田幼稚園", "pref": "坂出市立", "full": "林田幼稚園"}, {"id": "s103", "name": "羽床小学校", "short": "羽床小", "kana": "はゆか", "area": "中讃", "city": "綾川町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "綾川町立羽床小学校", "pref": "綾川町立", "full": "羽床小学校"}, {"id": "s33", "name": "飯山中学校", "short": "飯山中", "kana": "はんざん", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏", "合"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏・合）", "disp": "丸亀市立飯山中学校", "pref": "丸亀市立", "full": "飯山中学校"}, {"id": "s37", "name": "飯山高等学校", "short": "飯山高", "kana": "はんざん", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": ["普通", "専攻"]}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "男", "d": "", "v": ["半袖", "長袖"]}, {"n": "体操服", "g": "共", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "ベスト", "g": "女", "d": "", "v": ["夏", "冬", "普通", "専攻"]}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ／体操服　〈女子〉ブレザー（普通・専攻）／スカート（夏・冬）／ベスト（夏・冬）（普通・専攻）", "disp": "香川県立飯山高等学校", "pref": "香川県立", "full": "飯山高等学校"}, {"id": "s27", "name": "飯山北小学校", "short": "飯山北小", "kana": "はんざんきた", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 赤3本／袖 赤3", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー赤3:3（冬）／体操服", "disp": "丸亀市立飯山北小学校", "pref": "丸亀市立", "full": "飯山北小学校"}, {"id": "s28", "name": "飯山南小学校", "short": "飯山南小", "kana": "はんざんみなみ", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー3:0（冬）／体操服", "disp": "丸亀市立飯山南小学校", "pref": "丸亀市立", "full": "飯山南小学校"}, {"id": "s29", "name": "東中学校", "short": "東中", "kana": "ひがし", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏）", "disp": "丸亀市立東中学校", "pref": "丸亀市立", "full": "東中学校"}, {"id": "s85", "name": "東中学校", "short": "東中", "kana": "ひがし", "area": "中讃", "city": "善通寺市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏）", "disp": "善通寺市立東中学校", "pref": "善通寺市立", "full": "東中学校"}, {"id": "s143", "name": "比地小学校", "short": "比地小", "kana": "ひじ", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "スカート", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート（冬）／体操服", "disp": "三豊市立比地小学校", "pref": "三豊市立", "full": "比地小学校"}, {"id": "s11", "name": "ひつじヶ丘保育園", "short": "ひつじヶ丘保育園", "kana": "ひつじがおかほいくえん", "area": "中讃", "city": "丸亀市", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "ひつじヶ丘保育園", "pref": "私立", "full": "ひつじヶ丘保育園"}, {"id": "s60", "name": "香川大学教育学部附属坂出小学校", "short": "附属坂出小", "kana": "ふぞくさかいで", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "国立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "紺", "v": []}, {"n": "開襟シャツ", "g": "男", "d": "白・ポケット", "v": []}, {"n": "ズボン", "g": "男", "d": "紺", "v": []}, {"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "ブラウス", "g": "女", "d": "丸襟", "v": ["夏"]}, {"n": "ネクタイ", "g": "女", "d": "エンジ・ひし形", "v": []}, {"n": "ジャンパースカート", "g": "女", "d": "", "v": ["冬"]}, {"n": "コート", "g": "共", "d": "", "v": ["冬"]}, {"n": "スカート", "g": "女", "d": "", "v": ["夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "ジャンパースカート（冬）／兼用コート（冬）／セーラー（冬）／女子ブラウス（夏）／スカート（夏）／ズボン／体操服", "disp": "香川大学教育学部附属坂出小学校", "pref": "国立・香川大学教育学部", "full": "附属坂出小学校"}, {"id": "s64", "name": "香川大学教育学部附属坂出中学校", "short": "附属坂出中", "kana": "ふぞくさかいで", "area": "中讃", "city": "坂出市", "kind": "中学校", "kubun": "国立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "合"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・合）", "disp": "香川大学教育学部附属坂出中学校", "pref": "国立・香川大学教育学部", "full": "附属坂出中学校"}, {"id": "s69", "name": "香川大学教育学部附属特別支援学校", "short": "附属特別支援", "kana": "ふぞくとくべつしえん", "area": "中讃", "city": "坂出市", "kind": "特別支援学校", "kubun": "国立", "level": "sp", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川大学教育学部附属特別支援学校", "pref": "国立・香川大学教育学部", "full": "附属特別支援学校"}, {"id": "s50", "name": "香川大学教育学部附属幼稚園", "short": "附属幼稚園（坂出）", "kana": "ふぞくようちえん", "area": "中讃", "city": "坂出市", "kind": "幼稚園", "kubun": "国立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "香川大学教育学部附属幼稚園", "pref": "国立・香川大学教育学部", "full": "附属幼稚園"}, {"id": "s10", "name": "ふたば乳児保育園", "short": "ふたば乳児保育園", "kana": "ふたばにゅうじほいくえん", "area": "中讃", "city": "丸亀市", "kind": "保育所", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "ふたば乳児保育園", "pref": "私立", "full": "ふたば乳児保育園"}, {"id": "s57", "name": "府中小学校", "short": "府中小", "kana": "ふちゅう", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白2本／袖なし", "v": ["冬"]}, {"n": "リボン", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "セーラー2:0（冬）／体操服", "disp": "坂出市立府中小学校", "pref": "坂出市立", "full": "府中小学校"}, {"id": "s82", "name": "筆岡小学校", "short": "筆岡小", "kana": "ふでおか", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "ブレザー", "g": "女", "d": "シングル", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）／体操服", "disp": "善通寺市立筆岡小学校", "pref": "善通寺市立", "full": "筆岡小学校"}, {"id": "s73", "name": "筆岡幼稚園", "short": "筆岡幼稚園", "kana": "ふでおかようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺市立筆岡幼稚園", "pref": "善通寺市立", "full": "筆岡幼稚園"}, {"id": "s35", "name": "蓬莱中学校", "short": "蓬莱中", "kana": "ほうらい", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "私立", "level": "sec", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "蓬莱中学校", "pref": "私立", "full": "蓬莱中学校"}, {"id": "s40", "name": "蓬莱高等学校", "short": "蓬莱高", "kana": "ほうらい", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "シャツ", "g": "共", "d": "", "v": ["半袖", "長袖"]}, {"n": "スカート", "g": "女", "d": "", "v": ["夏", "冬"]}, {"n": "セーター", "g": "共", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖・長袖シャツ〈女子〉ブレザー／スカート（夏・冬）／半袖・長袖シャツ　〈兼用〉セーター", "disp": "蓬莱高等学校", "pref": "私立", "full": "蓬莱高等学校"}, {"id": "s20", "name": "本島小学校", "short": "本島小", "kana": "ほんじま", "area": "中讃", "city": "丸亀市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "丸亀市立本島小学校", "pref": "丸亀市立", "full": "本島小学校"}, {"id": "s59", "name": "松山小学校", "short": "松山小", "kana": "まつやま", "area": "中讃", "city": "坂出市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "学生服（襟折）", "g": "男", "d": "標準", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "半ズボン", "g": "男", "d": "標準・黒", "v": []}, {"n": "セーラー", "g": "女", "d": "ライン 白3本／袖 白3", "v": []}, {"n": "ネクタイ", "g": "女", "d": "エンジ", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [["案内のコツ", "坂出市の小学校はポロシャツに校章が付く学校が多い"]], "memo": "学ラン／セーラー3:3／体操服", "disp": "坂出市立松山小学校", "pref": "坂出市立", "full": "松山小学校"}, {"id": "s44", "name": "幼保連携型認定こども園松山こども園", "short": "松山こども園", "kana": "まつやまこどもえん", "area": "中讃", "city": "坂出市", "kind": "認定こども園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "坂出市立幼保連携型認定こども園松山こども園", "pref": "坂出市立・幼保連携型認定こども園", "full": "松山こども園"}, {"id": "s36", "name": "丸亀高等学校", "short": "丸亀高", "kana": "まるがめ", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "学ラン", "g": "男", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": ["赤", "青", "緑"]}, {"n": "ブレザー", "g": "女", "d": "", "v": []}, {"n": "ベスト", "g": "女", "d": "", "v": []}, {"n": "長袖シャツ", "g": "女", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": []}], "notes": [], "memo": "〈男子〉学ラン／ズボン／体操服（赤・青・緑）　〈女子〉ブレザー／ベスト／長袖シャツ／スカート／体操服", "disp": "香川県立丸亀高等学校", "pref": "香川県立", "full": "丸亀高等学校"}, {"id": "s38", "name": "丸亀城西高等学校", "short": "丸亀城西高", "kana": "まるがめじょうせい", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "公立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": ["夏", "冬"]}, {"n": "半袖シャツ", "g": "男", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}, {"n": "スカート", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "ベスト", "g": "女", "d": "", "v": ["冬", "夏"]}], "notes": [], "memo": "〈男子〉ブレザー／ズボン（夏・冬）／半袖シャツ／体操服　〈女子〉ブレザー／スカート（冬・夏）／ベスト（冬・夏）／体操服", "disp": "香川県立丸亀城西高等学校", "pref": "香川県立", "full": "丸亀城西高等学校"}, {"id": "s127", "name": "満濃中学校", "short": "満濃中", "kana": "まんのう", "area": "中讃", "city": "まんのう町", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏", "合"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏・合）／体操服", "disp": "まんのう町立満濃中学校", "pref": "まんのう町立", "full": "満濃中学校"}, {"id": "s124", "name": "満濃南小学校", "short": "満濃南小", "kana": "まんのうみなみ", "area": "中讃", "city": "まんのう町", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "ライン 赤2本／袖なし", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "赤2:0", "disp": "まんのう町立満濃南小学校", "pref": "まんのう町立", "full": "満濃南小学校"}, {"id": "s120", "name": "まんのう町立満濃南こども園", "short": "満濃南こども園", "kana": "まんのうみなみこどもえん", "area": "中讃", "city": "まんのう町", "kind": "認定こども園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "まんのう町立満濃南こども園", "pref": "まんのう町立", "full": "満濃南こども園"}, {"id": "s155", "name": "三豊中学校", "short": "三豊中", "kana": "みとよ", "area": "西讃", "city": "三豊市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート", "disp": "三豊市観音寺市学校組合立三豊中学校", "pref": "三豊市観音寺市学校組合立", "full": "三豊中学校"}, {"id": "s31", "name": "南中学校", "short": "南中", "kana": "みなみ", "area": "中讃", "city": "丸亀市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬", "夏"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬・夏）", "disp": "丸亀市立南中学校", "pref": "丸亀市立", "full": "南中学校"}, {"id": "s152", "name": "三野津中学校", "short": "三野津中", "kana": "みのつ", "area": "西讃", "city": "三豊市", "kind": "中学校", "kubun": "公立", "level": "sec", "items": [{"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "スカート", "disp": "三豊市立三野津中学校", "pref": "三豊市立", "full": "三野津中学校"}, {"id": "s41", "name": "村上学園高等学校", "short": "村上学園高", "kana": "むらかみがくえん", "area": "中讃", "city": "丸亀市", "kind": "高等学校", "kubun": "私立", "level": "sec", "items": [{"n": "ブレザー", "g": "共", "d": "", "v": []}, {"n": "ズボン", "g": "男", "d": "", "v": []}, {"n": "シャツ", "g": "男", "d": "", "v": ["半袖", "長袖"]}, {"n": "スカート", "g": "女", "d": "", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "〈男子〉ブレザー／ズボン／半袖・長袖シャツ〈女子〉ブレザー／スカート", "disp": "村上学園高等学校", "pref": "私立", "full": "村上学園高等学校"}, {"id": "s80", "name": "与北小学校", "short": "与北小", "kana": "よぎた", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "黒", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）／体操服", "disp": "善通寺市立与北小学校", "pref": "善通寺市立", "full": "与北小学校"}, {"id": "s145", "name": "吉津小学校", "short": "吉津小", "kana": "よしづ", "area": "西讃", "city": "三豊市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "セーラー", "g": "女", "d": "", "v": ["冬"]}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "セーラー（冬）", "disp": "三豊市立吉津小学校", "pref": "三豊市立", "full": "吉津小学校"}, {"id": "s83", "name": "吉原小学校", "short": "吉原小", "kana": "よしわら", "area": "中讃", "city": "善通寺市", "kind": "小学校", "kubun": "公立", "level": "ele", "items": [{"n": "ブレザー", "g": "共", "d": "シングル", "v": []}, {"n": "ポロシャツ", "g": "共", "d": "白", "v": []}, {"n": "ズボン", "g": "男", "d": "紺", "v": []}, {"n": "スカート", "g": "女", "d": "標準・24ヒダ", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "ブレザー（シングル）（男女）／体操服", "disp": "善通寺市立吉原小学校", "pref": "善通寺市立", "full": "吉原小学校"}, {"id": "s74", "name": "吉原幼稚園", "short": "吉原幼稚園", "kana": "よしわらようちえん", "area": "中讃", "city": "善通寺市", "kind": "幼稚園", "kubun": "公立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "善通寺市立吉原幼稚園", "pref": "善通寺市立", "full": "吉原幼稚園"}, {"id": "s47", "name": "認定こども園ルンビニ幼稚園", "short": "ルンビニ幼稚園", "kana": "るんびにようちえん", "area": "中讃", "city": "坂出市", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "認定こども園ルンビニ幼稚園", "pref": "私立・認定こども園", "full": "ルンビニ幼稚園"}, {"id": "s92", "name": "わかくさ北こども園", "short": "わかくさ北こども園", "kana": "わかくさきたこどもえん", "area": "中讃", "city": "宇多津町", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "わかくさ北こども園", "pref": "私立", "full": "わかくさ北こども園"}, {"id": "s93", "name": "わかくさこども園", "short": "わかくさこども園", "kana": "わかくさこどもえん", "area": "中讃", "city": "宇多津町", "kind": "認定こども園", "kubun": "私立", "level": "pre", "items": [{"n": "制服", "g": "共", "d": "品目の詳細は未登録", "v": []}, {"n": "体操服", "g": "共", "d": "", "v": []}], "notes": [], "memo": "", "disp": "わかくさこども園", "pref": "私立", "full": "わかくさこども園"}];
+const AREAS=[
+ {id:'東讃',cities:['東かがわ市','さぬき市','三木町']},
+ {id:'高松',cities:['高松市','直島町']},
+ {id:'中讃',cities:['丸亀市','坂出市','善通寺市','宇多津町','綾川町','多度津町','琴平町','まんのう町']},
+ {id:'西讃',cities:['観音寺市','三豊市']},
+ {id:'小豆',cities:['土庄町','小豆島町']}
+];
+const KINDS=[
+ {id:'all',name:'すべて',match:()=>true},
+ {id:'pre',name:'保・幼',match:s=>s.level==='pre'},
+ {id:'ele',name:'小',match:s=>s.kind==='小学校'},
+ {id:'jhs',name:'中',match:s=>s.kind==='中学校'},
+ {id:'hs',name:'高',match:s=>s.kind==='高等学校'||s.kind==='高専'},
+ {id:'sp',name:'支援',match:s=>s.kind==='特別支援学校'}
+];
+const KIND_TAG={'保育所':'保育','小規模保育':'保育','事業所内保育':'保育','認定こども園':'こども園','幼稚園':'幼稚園','小学校':'小','中学校':'中','高等学校':'高','高専':'高専','特別支援学校':'支援'};
+const cityOrder=c=>AREAS.flatMap(a=>a.cities).indexOf(c);
+
+/* サイズ：店のシール色で選ぶ（売り場の札と同じ区分） */
+const DOT={赤:'#D7322B',青:'#1F3FB0',黄:'#F2CE1B',緑:'#1E8A3A'};
+const CHARTS={
+  hs:{name:'高校',rows:[['赤','S','〜160'],['青','M','165'],['黄','L','170'],['緑','LL','175〜']]},
+  jhs:{name:'中学校女子',rows:[['赤','155・160',''],['青','165',''],['黄','170',''],['緑','175以上','']]},
+  ele:{name:'小学校女子',rows:[['赤','115・120・125',''],[null,'130・135',''],['黄','140・145',''],['緑','150以上','']]},
+  waist:{name:'学ランズボン',rows:[['赤','〜70',''],['青','73〜79（80）',''],['黄','82〜88',''],['緑','92〜','']]}
+};
+const PLAIN={pre:['90','100','110','120','130'],free:['フリー'],gymEle:['120','130','140','150','160','160〜'],gymSec:['SS','S','M','L','LL','3L','4L','5L']};
+function catOf(n){
+  if(/ネクタイ|リボン/.test(n))return 'free';
+  if(/ズボン/.test(n))return 'pants';
+  if(/体操服/.test(n))return 'gym';
+  return 'other';
+}
+function chartKey(s,item){
+  if(!item) return null;
+  const c=catOf(item.n);
+  if(c==='free'||s.level==='pre'||c==='gym') return null;
+  const gakuran=s.items.some(i=>/学ラン|学生服/.test(i.n));
+  if(c==='pants'&&gakuran&&s.level!=='ele') return 'waist';
+  if(s.kind==='小学校') return 'ele';
+  if(s.kind==='中学校') return c==='gym'?'hs':'jhs';
+  return 'hs';
+}
+function sizeList(s,item){
+  const k=chartKey(s,item);
+  if(k) return CHARTS[k].rows.map(([col,l,sub])=>({key:k+':'+l,dot:col,label:l,sub,
+    text:(col?col+'シール':'シールなし')+'（'+l+(sub?'／'+sub:'')+'）'}));
+  const c=item?catOf(item.n):'';
+  const list=c==='free'?PLAIN.free:(c==='gym'&&s.level!=='pre')?(s.kind==='小学校'?PLAIN.gymEle:PLAIN.gymSec):PLAIN.pre;
+  return list.map(z=>({key:z,label:z,sub:'',text:z}));
+}
+function sizeChartName(s,item){const k=chartKey(s,item);return k?CHARTS[k].name:'';}
+
+/* ============ 状態 ============ */
+const S={school:null,q:'',kind:'all',area:'all',gender:'女',item:'セーラー',vars:new Set(),season:null,gparts:new Set(),sizes:new Set(),sizeFree:''};
+const $=id=>document.getElementById(id);
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hira=t=>String(t||'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+const school=()=>SCHOOLS.find(s=>s.id===S.school);
+const CITY_KANA={'綾川町':'あやがわちょう','宇多津町':'うたづちょう','観音寺市':'かんおんじし','琴平町':'ことひらちょう','坂出市':'さかいでし','さぬき市':'さぬきし','小豆島町':'しょうどしまちょう','善通寺市':'ぜんつうじし','高松市':'たかまつし','多度津町':'たどつちょう','土庄町':'とのしょうちょう','直島町':'なおしまちょう','東かがわ市':'ひがしかがわし','丸亀市':'まるがめし','まんのう町':'まんのうちょう','三木町':'みきちょう','三豊市':'みとよし'};
+const cityKana=c=>CITY_KANA[c]||c;
+const GYO=[['あ','あいうえお'],['か','かきくけこがぎぐげご'],['さ','さしすせそざじずぜぞ'],['た','たちつてとだぢづでど'],['な','なにぬねの'],['は','はひふへほばびぶべぼぱぴぷぺぽ'],['ま','まみむめも'],['や','やゆよ'],['ら','らりるれろ'],['わ','わをん']];
+const gyo=k=>{const c=(k||'')[0];const r=GYO.find(([,cs])=>cs.includes(c));return r?r[0]+'行':'その他';};
+const curItem=()=>school()?.items.find(i=>i.n===S.item);
+const gOk=(it,g)=>g==='all'||it.g==='共'||it.g===g;
+
+/* ============ 学校リスト ============ */
+function renderPicker(){
+  const q=hira(S.q.trim());
+  const base=SCHOOLS.filter(s=>!q||hira(s.name).includes(q)||s.kana.includes(q)||hira(s.short).includes(q)||hira(s.full).includes(q)||s.city.includes(q)||s.pref.includes(q));
+  const byKind=base.filter(s=>KINDS.find(k=>k.id===S.kind).match(s));
+  $('kindChips').innerHTML=KINDS.map(k=>`<button class="chip" data-kind="${k.id}" aria-pressed="${S.kind===k.id}">${k.name}<small class="num">${base.filter(k.match).length}</small></button>`).join('');
+  $('areaChips').innerHTML=[{id:'all'},...AREAS].map(a=>`<button class="chip" data-area="${a.id}" aria-pressed="${S.area===a.id}">${a.id==='all'?'全県':a.id}<small class="num">${byKind.filter(s=>a.id==='all'||s.area===a.id).length}</small></button>`).join('');
+  const list=byKind.filter(s=>S.area==='all'||s.area===S.area);
+  list.sort((a,b)=>cityKana(a.city).localeCompare(cityKana(b.city),'ja')||a.kana.localeCompare(b.kana,'ja'));
+  let html='',last=null;
+  list.forEach(s=>{
+    const g=s.city;
+    if(g!==last){last=g;html+=`<div class="grp"><span>${esc(g)}</span><span class="num">${list.filter(x=>x.city===g).length}校</span></div>`;}
+    html+=`<button class="school" data-school="${s.id}" aria-pressed="${s.id===S.school}">
+      <span class="t">${KIND_TAG[s.kind]}</span>
+      <span class="n"><span class="pf">${esc(s.pref)}</span>${esc(s.full)}</span></button>`;
+  });
+  $('schoolList').innerHTML=list.length?html:`<p class="empty-note">${q?'「'+esc(S.q)+'」に当てはまる取扱い校はありません':'この条件の取扱い校はありません'}</p>`;
+  $('countNote').textContent=`取扱い校 全${SCHOOLS.length}校`;
+  $('curSchool').textContent=school()?school().disp:'';
+  const col=$('picker').classList.contains('collapsed');
+  $('toggleList').hidden=!school(); $('toggleList').textContent=col?'変更':'閉じる';
+}
+
+/* ============ 学校カード ============ */
+function renderSchool(){
+  const s=school();
+  $('filters').hidden=!s; $('inquiry').hidden=!s;
+  if(!s){$('schoolCard').innerHTML=`<div class="start"><b>学校を選んでください</b><span>学校名・よみで検索するか、一覧から選ぶと、制服の品目とサイズがここに出ます。</span></div>`;return;}
+  const col=(g,label,cls)=>{
+    const its=s.items.filter(i=>i.g===g);
+    return `<div class="wcol"><h3><span class="gmark ${cls}"></span>${label}</h3>${its.length?its.map(i=>`
+      <button class="witem" data-pick="${esc(i.n)}" data-pg="${g==='共'?'':g}" aria-pressed="${S.item===i.n}">
+        <b>${esc(i.n)}</b>${i.d||i.v.length?`<small>${esc([i.d,i.v.join('・')].filter(Boolean).join('／'))}</small>`:''}</button>`).join(''):'<span class="none">登録なし</span>'}</div>`;
+  };
+  $('schoolCard').innerHTML=`
+    <div class="sc-head"><h2><small class="pf">${esc(s.pref)}</small>${esc(s.full)}</h2><span class="meta">${esc(s.city)}（${esc(s.area)}）・${esc(s.kind)}${s.kana?'　よみ：'+esc(s.kana):''}</span></div>
+    <div><span class="label">取扱い品目（タップで選択）</span>
+      <div class="wardrobe" style="margin-top:6px">${col('男','男子','g-m')}${col('女','女子','g-f')}${col('共','男女共通','g-u')}</div></div>
+    ${s.notes.length?`<div><span class="label">この学校の特徴・注意</span><ul class="notes" style="margin-top:6px">${s.notes.map(([t,x])=>`<li><span class="tag">${esc(t)}</span><span>${esc(x)}</span></li>`).join('')}</ul></div>`:''}`;
+}
+
+/* ============ 絞り込み（性別・品目・種類・サイズ） ============ */
+/* 体操服：夏・冬とその中身（全校共通） */
+const GYM={夏:['半袖','ハーフパンツ'],冬:['トレシャツ','トレパン']};
+const GYM_SKIP=['夏','冬','合','半','トレ'];
+const isGym=it=>it&&it.n==='体操服';
+const otherVars=it=>it?(isGym(it)?it.v.filter(v=>!GYM_SKIP.includes(v)):it.v):[];
+function chipRow(label,vals,attr,isOn){
+  return `<div class="frow"><span class="label">${label}</span><div class="chips">${vals.map(v=>`<button class="chip sm" data-${attr}="${esc(v)}" aria-pressed="${isOn(v)}">${esc(v)}</button>`).join('')}</div></div>`;
+}
+function varRows(it){
+  if(!it) return '';
+  let h='';
+  if(isGym(it)){
+    h+=chipRow('季節',Object.keys(GYM),'season',v=>S.season===v);
+    if(S.season) h+=chipRow('種類',GYM[S.season],'gpart',v=>S.gparts.has(v));
+    const o=otherVars(it); if(o.length) h+=chipRow('色など',o,'var',v=>S.vars.has(v));
+  }else if(it.v.length){
+    h+=chipRow('種類',it.v,'var',v=>S.vars.has(v));
+  }
+  return h;
+}
+function resetVars(){S.vars.clear();S.season=null;S.gparts.clear();}
+function renderFilters(){
+  const s=school(); if(!s) return; const it=curItem();
+  const items=s.items.filter(i=>gOk(i,S.gender));
+  const sizes=sizeList(s,it);
+  $('filters').innerHTML=`
+    <span class="label">2　聞き取り（タップするとすぐ反映）</span>
+    <div class="frow"><span class="label">性別</span><div class="seg">${[['女','女子'],['男','男子'],['all','指定なし']].map(([k,l])=>`<button data-gender="${k}" aria-pressed="${S.gender===k}">${l}</button>`).join('')}</div></div>
+    <div class="frow"><span class="label">品目</span><div class="chips">${items.map(i=>`<button class="chip sm" data-item="${esc(i.n)}" aria-pressed="${S.item===i.n}">${esc(i.n)}</button>`).join('')}</div></div>
+    ${varRows(it)}
+    <div class="frow"><span class="label">サイズ${sizeChartName(s,it)?`<br><small class="chart-name">${esc(sizeChartName(s,it))}の札</small>`:''}</span><div class="chips">${sizes.map(z=>`<button class="chip sm num size-chip" data-size="${esc(z.key)}" aria-pressed="${S.sizes.has(z.key)}">${z.dot!==undefined?`<span class="sdot${z.dot?'':' none'}" style="${z.dot?'background:'+DOT[z.dot]:''}"></span>`:''}<span>${esc(z.label)}${z.sub?`<small>${esc(z.sub)}</small>`:''}</span></button>`).join('')}
+      <input class="sizefree" id="sizeFree" placeholder="その他のサイズ" value="${esc(S.sizeFree)}" autocomplete="off"></div></div>
+    <div class="fbar"><button class="linkbtn" id="clearF" style="margin-left:auto">聞き取りをリセット</button></div>`;
+}
+function inquiryText(){
+  const s=school(); if(!s) return ''; const it=curItem();
+  const p=[s.disp,S.gender==='all'?'性別指定なし':S.gender+'子'];
+  if(it){ let n=it.n; const bits=[];
+    if(isGym(it)&&S.season) bits.push(S.season+(S.gparts.size?'：'+[...S.gparts].join('・'):''));
+    if(S.vars.size) bits.push([...S.vars].join('・'));
+    if(bits.length) n+='（'+bits.join('／')+'）'; p.push(n); }
+  const all=sizeList(s,it); const sz=all.filter(z=>S.sizes.has(z.key)).map(z=>z.text); if(S.sizeFree.trim()) sz.push(S.sizeFree.trim());
+  if(sz.length) p.push('サイズ '+sz.join('・'));
+  return p.join(' ／ ');
+}
+function renderInquiry(){
+  if(!school()) return; const it=curItem(); const sz=S.sizes.size||S.sizeFree.trim();
+  const detail=it&&it.d?`<small>${esc(it.n)}：${esc(it.d)}</small>`:'';
+  $('inquiry').innerHTML=`
+    <span class="label">3　問い合わせ内容</span>
+    <div class="inq-sum">${esc(inquiryText())}${!it?'<br><span class="ph">品目を選んでください</span>':!sz?'<br><span class="ph">サイズを選ぶか入力してください</span>':''}${detail}</div>
+    <div class="cta"><button class="btn primary" id="toMemo">通話メモに残す</button>
+      <span class="stock-note">在庫データは未接続。つなぐとここに該当在庫が出ます</span></div>`;
+}
+function render(){renderPicker();renderSchool();renderFilters();renderInquiry();}
+
+/* ============ 操作 ============ */
+function selectSchool(id){
+  S.school=id; const s=school();
+  if(!s.items.some(i=>i.n===S.item&&gOk(i,S.gender))){S.item=(s.items.find(i=>gOk(i,S.gender))||s.items[0]).n;}
+  resetVars(); S.sizes.clear(); S.sizeFree='';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b||b.closest('#sheet')) return;
+  const d=b.dataset;
+  if(d.school){selectSchool(d.school);$('picker').classList.add('collapsed');render();window.scrollTo({top:0});return;}
+  if(d.kind){S.kind=d.kind;renderPicker();return;}
+  if(d.area){S.area=d.area;renderPicker();return;}
+  if(d.pick){S.item=d.pick;if(d.pg)S.gender=d.pg;resetVars();S.sizes.clear();render();return;}
+  if(d.gender){S.gender=d.gender;const it=curItem();if(!it||!gOk(it,S.gender)){const f=school().items.find(i=>gOk(i,S.gender));S.item=f?f.n:'';resetVars();S.sizes.clear();}render();return;}
+  if('item' in d){S.item=d.item;resetVars();S.sizes.clear();render();return;}
+  if(d.var){S.vars.has(d.var)?S.vars.delete(d.var):S.vars.add(d.var);render();return;}
+  if(d.season){if(S.season===d.season){S.season=null;}else{S.season=d.season;}S.gparts.clear();render();return;}
+  if(d.gpart){S.gparts.has(d.gpart)?S.gparts.delete(d.gpart):S.gparts.add(d.gpart);render();return;}
+  if(d.size){S.sizes.has(d.size)?S.sizes.delete(d.size):S.sizes.add(d.size);render();return;}
+  if(b.id==='clearF'){resetVars();S.sizes.clear();S.sizeFree='';render();return;}
+  if(b.id==='toMemo'){openMemo();return;}
+  if(b.id==='toggleList'){$('picker').classList.toggle('collapsed');renderPicker();return;}
+});
+document.addEventListener('input',e=>{if(e.target.id==='sizeFree'){S.sizeFree=e.target.value;renderInquiry();}});
+$('q').addEventListener('input',e=>{S.q=e.target.value;renderPicker();});
+
+/* ============ 通話メモ ============ */
+const KEY='sakuraya-call-memos';
+let memos=[]; try{memos=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){memos=[]}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(memos))}catch(_){}}
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+function memoText(m){return `${m.at}　${m.kind}${m.cb?'【折り返し】':''}\n${m.summary}\n${m.name||'（名前なし）'} ${m.tel||''}${m.note?'\n'+m.note:''}`}
+function renderLogs(){
+  $('memoCount').textContent=memos.length;
+  $('logs').innerHTML=memos.length?memos.map((m,i)=>`<div class="log"><div class="lh"><b>${esc(m.name||'名前なし')}</b><span class="num">${esc(m.tel||'')}</span>${m.cb?'<span class="cb">折り返し</span>':''}<button class="del" data-del="${i}">削除</button></div>
+    <span>${esc(m.at)}・${esc(m.kind)}</span><span>${esc(m.summary)}</span>${m.note?`<span>${esc(m.note)}</span>`:''}</div>`).join(''):'<p class="empty-note">まだメモはありません</p>';
+}
+function openMemo(){const it=curItem();$('memoSummary').value=inquiryText()+(it&&it.d?`\n（${it.n}：${it.d}）`:'');$('sheet').hidden=false;$('scrim').hidden=false;renderLogs();}
+function closeMemo(){$('sheet').hidden=true;$('scrim').hidden=true;}
+$('openMemo').onclick=openMemo; $('closeMemo').onclick=closeMemo; $('scrim').onclick=closeMemo;
+$('saveMemo').onclick=()=>{
+  const d=new Date(); const at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  memos.unshift({at,summary:$('memoSummary').value,name:$('memoName').value.trim(),tel:$('memoTel').value.trim(),kind:$('memoKind').value,cb:$('memoCb').checked,note:$('memoNote').value.trim()});
+  persist();['memoName','memoTel','memoNote'].forEach(id=>$(id).value='');$('memoCb').checked=false;renderLogs();toast('メモを保存しました');
+};
+$('copyMemo').onclick=()=>{
+  const t=memos.map(memoText).join('\n\n');
+  if(!t){toast('コピーするメモがありません');return;}
+  navigator.clipboard.writeText(t).then(()=>toast('全件コピーしました')).catch(()=>{$('memoNote').value=t;$('memoNote').select();toast('メモ欄に貼り出しました。選択してコピーしてください')});
+};
+$('logs').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;memos.splice(+b.dataset.del,1);persist();renderLogs();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeMemo();});
+
+renderLogs(); render();
+</script>
+
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
