@@ -1,5 +1,5 @@
 // 電波がなくても開けるよう、アプリのファイルを端末に保存する
-const CACHE = 'sakuraya-v1';  // 中身を更新したら v2, v3… と数字を上げる
+const CACHE = 'sakuraya-v2';  // 中身を更新したら v2, v3… と数字を上げる
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

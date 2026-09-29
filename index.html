@@ -233,14 +233,17 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
 .start span{color:var(--muted);font-size:14px}
 .school .pf{display:block;font-size:11px;font-weight:400;color:var(--muted);line-height:1.3}
 .sc-head h2 .pf{display:block;font-size:13px;font-weight:700;color:var(--muted);font-family:var(--f-body)}
-@media (max-width:520px){.brand span{display:none}.brand h1{font-size:17px}}
+.reset-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;height:42px;padding:0 16px;font-weight:700}
+.reset-btn:hover{border-color:var(--muted)}
+@media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
 
 </head>
 <body>
 <header class="top">
-  <div class="brand"><h1>さくらや 問い合わせ手帳</h1><span>電話を受けながら、タップで聞き取り</span></div>
+  <div class="brand"><h1><span>さくらや </span>問い合わせ手帳</h1><span>電話を受けながら、タップで聞き取り</span></div>
+  <button class="reset-btn" id="resetAll">最初から</button>
   <button class="memo-btn" id="openMemo">通話メモ <span class="cnt num" id="memoCount">0</span></button>
 </header>
 
@@ -281,7 +284,7 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
     <div class="field"><span class="label">折り返し</span><label class="switch"><input type="checkbox" id="memoCb"> 折り返しが必要</label></div>
   </div>
   <div class="field"><label class="label" for="memoNote">メモ</label><textarea id="memoNote" placeholder="例：3月中に来店予定。身長158cm"></textarea></div>
-  <div class="btnrow"><button class="btn primary" id="saveMemo">メモを保存</button><button class="btn" id="copyMemo">全件コピー</button></div>
+  <div class="btnrow"><button class="btn primary" id="saveMemo">メモを保存</button><button class="btn" id="saveReset">保存して最初から</button><button class="btn" id="copyMemo">全件コピー</button></div>
   <span class="label">保存したメモ（この端末のみ）</span>
   <div class="logs" id="logs"></div>
 </aside>
@@ -474,6 +477,7 @@ document.addEventListener('click',e=>{
   if(d.season){if(S.season===d.season){S.season=null;}else{S.season=d.season;}S.gparts.clear();render();return;}
   if(d.gpart){S.gparts.has(d.gpart)?S.gparts.delete(d.gpart):S.gparts.add(d.gpart);render();return;}
   if(d.size){S.sizes.has(d.size)?S.sizes.delete(d.size):S.sizes.add(d.size);render();return;}
+  if(b.id==='resetAll'){resetAll();return;}
   if(b.id==='clearF'){resetVars();S.sizes.clear();S.sizeFree='';render();return;}
   if(b.id==='toMemo'){openMemo();return;}
   if(b.id==='toggleList'){$('picker').classList.toggle('collapsed');renderPicker();return;}
@@ -481,6 +485,14 @@ document.addEventListener('click',e=>{
 document.addEventListener('input',e=>{if(e.target.id==='sizeFree'){S.sizeFree=e.target.value;renderInquiry();}});
 $('q').addEventListener('input',e=>{S.q=e.target.value;renderPicker();});
 
+
+function resetAll(){
+  S.school=null;S.q='';S.kind='all';S.area='all';S.gender='女';S.item='';
+  resetVars();S.sizes.clear();S.sizeFree='';
+  $('q').value='';$('picker').classList.remove('collapsed');
+  render();window.scrollTo({top:0});const l=$('schoolList');if(l)l.scrollTop=0;
+  toast('最初の画面に戻りました');
+}
 /* ============ 通話メモ ============ */
 const KEY='sakuraya-call-memos';
 let memos=[]; try{memos=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){memos=[]}
@@ -500,6 +512,7 @@ $('saveMemo').onclick=()=>{
   memos.unshift({at,summary:$('memoSummary').value,name:$('memoName').value.trim(),tel:$('memoTel').value.trim(),kind:$('memoKind').value,cb:$('memoCb').checked,note:$('memoNote').value.trim()});
   persist();['memoName','memoTel','memoNote'].forEach(id=>$(id).value='');$('memoCb').checked=false;renderLogs();toast('メモを保存しました');
 };
+$('saveReset').onclick=()=>{$('saveMemo').onclick();closeMemo();resetAll();toast('メモを保存して、最初の画面に戻りました');};
 $('copyMemo').onclick=()=>{
   const t=memos.map(memoText).join('\n\n');
   if(!t){toast('コピーするメモがありません');return;}
