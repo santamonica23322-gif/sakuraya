@@ -235,6 +235,8 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
 .sc-head h2 .pf{display:block;font-size:13px;font-weight:700;color:var(--muted);font-family:var(--f-body)}
 .reset-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;height:42px;padding:0 16px;font-weight:700}
 .reset-btn:hover{border-color:var(--muted)}
+.day-chips{gap:6px}
+.day-chips .chip small{font-size:11px;opacity:.7;margin-left:4px}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -284,8 +286,10 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
     <div class="field"><span class="label">折り返し</span><label class="switch"><input type="checkbox" id="memoCb"> 折り返しが必要</label></div>
   </div>
   <div class="field"><label class="label" for="memoNote">メモ</label><textarea id="memoNote" placeholder="例：3月中に来店予定。身長158cm"></textarea></div>
-  <div class="btnrow"><button class="btn primary" id="saveMemo">メモを保存</button><button class="btn" id="saveReset">保存して最初から</button><button class="btn" id="copyMemo">全件コピー</button></div>
-  <span class="label">保存したメモ（この端末のみ）</span>
+  <div class="btnrow"><button class="btn primary" id="saveMemo">メモを保存</button><button class="btn" id="saveReset">保存して最初から</button></div>
+  <div class="memo-head"><span class="label">保存したメモ（日付ごと・この端末のみ）</span></div>
+  <div class="chips day-chips" id="memoDays"></div>
+  <div class="btnrow"><button class="btn" id="copyDay">この日をコピー</button><button class="btn" id="copyMemo">全件コピー</button></div>
   <div class="logs" id="logs"></div>
 </aside>
 <div class="toast" id="toast" hidden></div>
@@ -351,6 +355,20 @@ const S={school:null,q:'',kind:'all',area:'all',gender:'女',item:'セーラー'
 const $=id=>document.getElementById(id);
 const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hira=t=>String(t||'').replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
+
+/* 検索：部分一致・ひらがな／カタカナ・全角半角・スペース区切りの複数語に対応 */
+const norm=t=>hira(String(t||'').normalize('NFKC').toLowerCase()).replace(/[\s・･　]/g,'').replace(/[ヶケゖ]/g,'が');
+const KIND_YOMI={'小学校':'しょうがっこう','中学校':'ちゅうがっこう','高等学校':'こうとうがっこう 高校 こうこう','高専':'こうせん こうとうせんもんがっこう','幼稚園':'ようちえん','保育所':'ほいくしょ ほいくえん 保育園','小規模保育':'ほいくえん 保育園','事業所内保育':'ほいくえん','認定こども園':'こどもえん','特別支援学校':'しえんがっこう'};
+const SUF_YOMI={'小':'しょう','中':'ちゅう','高':'こう'};
+const HAY=new Map();
+function hayOf(s){
+  if(HAY.has(s.id)) return HAY.get(s.id);
+  const cb=s.city.replace(/(市|町)$/,''); const ck=cityKana(s.city).replace(/(し|ちょう)$/,'');
+  const suf=SUF_YOMI[s.short.slice(-1)]||'';
+  const parts=[s.name,s.disp,s.pref+s.full,s.short,s.full,s.kana,s.kana+suf,s.kana+(KIND_YOMI[s.kind]||'').split(' ')[0],
+    s.city,cityKana(s.city),cb+s.short,cb+s.full,ck+s.kana,ck+s.kana+suf,s.kind,KIND_YOMI[s.kind]||'',s.pref,s.area];
+  const h=parts.map(norm).join('|'); HAY.set(s.id,h); return h;
+}
 const school=()=>SCHOOLS.find(s=>s.id===S.school);
 const CITY_KANA={'綾川町':'あやがわちょう','宇多津町':'うたづちょう','観音寺市':'かんおんじし','琴平町':'ことひらちょう','坂出市':'さかいでし','さぬき市':'さぬきし','小豆島町':'しょうどしまちょう','善通寺市':'ぜんつうじし','高松市':'たかまつし','多度津町':'たどつちょう','土庄町':'とのしょうちょう','直島町':'なおしまちょう','東かがわ市':'ひがしかがわし','丸亀市':'まるがめし','まんのう町':'まんのうちょう','三木町':'みきちょう','三豊市':'みとよし'};
 const cityKana=c=>CITY_KANA[c]||c;
@@ -361,8 +379,9 @@ const gOk=(it,g)=>g==='all'||it.g==='共'||it.g===g;
 
 /* ============ 学校リスト ============ */
 function renderPicker(){
-  const q=hira(S.q.trim());
-  const base=SCHOOLS.filter(s=>!q||hira(s.name).includes(q)||s.kana.includes(q)||hira(s.short).includes(q)||hira(s.full).includes(q)||s.city.includes(q)||s.pref.includes(q));
+  const q=S.q.trim();
+  const terms=q.split(/[\s\u3000]+/).map(norm).filter(Boolean);
+  const base=SCHOOLS.filter(s=>!terms.length||terms.every(t=>hayOf(s).includes(t)));
   const byKind=base.filter(s=>KINDS.find(k=>k.id===S.kind).match(s));
   $('kindChips').innerHTML=KINDS.map(k=>`<button class="chip" data-kind="${k.id}" aria-pressed="${S.kind===k.id}">${k.name}<small class="num">${base.filter(k.match).length}</small></button>`).join('');
   $('areaChips').innerHTML=[{id:'all'},...AREAS].map(a=>`<button class="chip" data-area="${a.id}" aria-pressed="${S.area===a.id}">${a.id==='all'?'全県':a.id}<small class="num">${byKind.filter(s=>a.id==='all'||s.area===a.id).length}</small></button>`).join('');
@@ -498,26 +517,51 @@ const KEY='sakuraya-call-memos';
 let memos=[]; try{memos=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(_){memos=[]}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(memos))}catch(_){}}
 function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
-function memoText(m){return `${m.at}　${m.kind}${m.cb?'【折り返し】':''}\n${m.summary}\n${m.name||'（名前なし）'} ${m.tel||''}${m.note?'\n'+m.note:''}`}
-function renderLogs(){
-  $('memoCount').textContent=memos.length;
-  $('logs').innerHTML=memos.length?memos.map((m,i)=>`<div class="log"><div class="lh"><b>${esc(m.name||'名前なし')}</b><span class="num">${esc(m.tel||'')}</span>${m.cb?'<span class="cb">折り返し</span>':''}<button class="del" data-del="${i}">削除</button></div>
-    <span>${esc(m.at)}・${esc(m.kind)}</span><span>${esc(m.summary)}</span>${m.note?`<span>${esc(m.note)}</span>`:''}</div>`).join(''):'<p class="empty-note">まだメモはありません</p>';
+const WD='日月火水木金土';
+const pad=n=>String(n).padStart(2,'0');
+function memoTs(m){
+  if(m.ts) return m.ts;
+  const mm=/(\d+)\/(\d+)\s+(\d+):(\d+)/.exec(m.at||''); const now=new Date();
+  if(!mm) return Date.now();
+  let y=now.getFullYear(); if(+mm[1]>now.getMonth()+1) y--;
+  return new Date(y,+mm[1]-1,+mm[2],+mm[3],+mm[4]).getTime();
 }
-function openMemo(){const it=curItem();$('memoSummary').value=inquiryText()+(it&&it.d?`\n（${it.n}：${it.d}）`:'');$('sheet').hidden=false;$('scrim').hidden=false;renderLogs();}
+memos.forEach(m=>{if(!m.ts)m.ts=memoTs(m);});
+const dayKey=ts=>{const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const dayLabel=k=>{const [y,mo,da]=k.split('-').map(Number);const d=new Date(y,mo-1,da);return `${mo}/${da}（${WD[d.getDay()]}）`;};
+const todayKey=()=>dayKey(Date.now());
+let memoDay=todayKey();
+function memoText(m){const d=new Date(m.ts);return `${pad(d.getHours())}:${pad(d.getMinutes())}　${m.kind}${m.cb?'【折り返し】':''}\n${m.summary}\n${m.name||'（名前なし）'} ${m.tel||''}${m.note?'\n'+m.note:''}`}
+function renderLogs(){
+  const tk=todayKey();
+  $('memoCount').textContent=memos.filter(m=>dayKey(m.ts)===tk).length;
+  const days=[...new Set(memos.map(m=>dayKey(m.ts)))].sort().reverse();
+  if(!days.includes(tk)) days.unshift(tk);
+  if(!days.includes(memoDay)) memoDay=tk;
+  $('memoDays').innerHTML=days.map(k=>{const n=memos.filter(m=>dayKey(m.ts)===k).length;
+    return `<button class="chip sm" data-day="${k}" aria-pressed="${k===memoDay}">${k===tk?'今日 ':''}${dayLabel(k)}<small class="num">${n}件</small></button>`;}).join('');
+  const list=memos.map((m,i)=>({m,i})).filter(x=>dayKey(x.m.ts)===memoDay).sort((a,b)=>b.m.ts-a.m.ts);
+  $('logs').innerHTML=list.length?list.map(({m,i})=>{const d=new Date(m.ts);return `<div class="log"><div class="lh"><b>${esc(m.name||'名前なし')}</b><span class="num">${esc(m.tel||'')}</span>${m.cb?'<span class="cb">折り返し</span>':''}<button class="del" data-del="${i}">削除</button></div>
+    <span class="num">${pad(d.getHours())}:${pad(d.getMinutes())}・${esc(m.kind)}</span><span>${esc(m.summary)}</span>${m.note?`<span>${esc(m.note)}</span>`:''}</div>`;}).join(''):`<p class="empty-note">${memoDay===tk?'今日':'この日'}のメモはまだありません</p>`;
+}
+function copyText(t,okMsg){
+  if(!t){toast('コピーするメモがありません');return;}
+  navigator.clipboard.writeText(t).then(()=>toast(okMsg)).catch(()=>{$('memoNote').value=t;$('memoNote').select();toast('メモ欄に貼り出しました。選択してコピーしてください')});
+}
+function dayBlock(k){const ms=memos.filter(m=>dayKey(m.ts)===k).sort((a,b)=>a.ts-b.ts);if(!ms.length)return '';return `【${dayLabel(k)}の通話メモ ${ms.length}件】\n\n`+ms.map(memoText).join('\n\n');}
+function openMemo(){const it=curItem();$('memoSummary').value=inquiryText()+(it&&it.d?`\n（${it.n}：${it.d}）`:'');$('sheet').hidden=false;$('scrim').hidden=false;memoDay=todayKey();renderLogs();}
 function closeMemo(){$('sheet').hidden=true;$('scrim').hidden=true;}
 $('openMemo').onclick=openMemo; $('closeMemo').onclick=closeMemo; $('scrim').onclick=closeMemo;
 $('saveMemo').onclick=()=>{
-  const d=new Date(); const at=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  memos.unshift({at,summary:$('memoSummary').value,name:$('memoName').value.trim(),tel:$('memoTel').value.trim(),kind:$('memoKind').value,cb:$('memoCb').checked,note:$('memoNote').value.trim()});
+  const d=new Date(); const at=`${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  memoDay=dayKey(d.getTime());
+  memos.unshift({ts:d.getTime(),at,summary:$('memoSummary').value,name:$('memoName').value.trim(),tel:$('memoTel').value.trim(),kind:$('memoKind').value,cb:$('memoCb').checked,note:$('memoNote').value.trim()});
   persist();['memoName','memoTel','memoNote'].forEach(id=>$(id).value='');$('memoCb').checked=false;renderLogs();toast('メモを保存しました');
 };
 $('saveReset').onclick=()=>{$('saveMemo').onclick();closeMemo();resetAll();toast('メモを保存して、最初の画面に戻りました');};
-$('copyMemo').onclick=()=>{
-  const t=memos.map(memoText).join('\n\n');
-  if(!t){toast('コピーするメモがありません');return;}
-  navigator.clipboard.writeText(t).then(()=>toast('全件コピーしました')).catch(()=>{$('memoNote').value=t;$('memoNote').select();toast('メモ欄に貼り出しました。選択してコピーしてください')});
-};
+$('copyMemo').onclick=()=>{const days=[...new Set(memos.map(m=>dayKey(m.ts)))].sort();copyText(days.map(dayBlock).join('\n\n'),'全件コピーしました');};
+$('copyDay').onclick=()=>copyText(dayBlock(memoDay),dayLabel(memoDay)+'のメモをコピーしました');
+$('memoDays').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(!b)return;memoDay=b.dataset.day;renderLogs();});
 $('logs').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;memos.splice(+b.dataset.del,1);persist();renderLogs();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeMemo();});
 
