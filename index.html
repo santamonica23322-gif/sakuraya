@@ -311,6 +311,11 @@ body.pm-open{overflow:hidden}
 .pm-kinds button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;height:48px;font-size:15px;font-weight:700;padding:0;border-bottom:4px solid var(--kc,var(--line))}
 .pm-kinds button.on{background:var(--kc,var(--ink));color:#fff;border-color:var(--kc,var(--ink))}
 .pm-top-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:36;border:0;border-radius:999px;background:var(--ink);color:var(--surface);height:56px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;font-weight:900;font-size:16px;box-shadow:0 6px 18px rgba(10,15,25,.3)}
+.gyo-index{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);padding:6px 0;box-shadow:0 6px 8px -6px rgba(10,15,25,.25)}
+@media (min-width:861px){.gyo-index{position:static}}
+.gyo-index button{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:8px;height:40px;font-size:15px;font-weight:700;padding:0}
+.gyo-index button[disabled]{opacity:.3}
+.gy{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--muted);padding:2px 2px 0}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -334,6 +339,7 @@ body.pm-open{overflow:hidden}
     <div class="picker-body">
       <input class="search" id="q" type="search" placeholder="学校名・よみで検索（例：じょうけん、さかいで）" autocomplete="off">
       <div class="chips kind-chips" id="kindChips"></div>
+      <div class="gyo-index" id="gyoIndex"></div>
       <div class="school-list" id="schoolList"></div>
       <span class="count-note" id="countNote"></span>
     </div>
@@ -464,21 +470,37 @@ function renderPicker(){
   const byKind=base.filter(s=>KINDS.find(k=>k.id===S.kind).match(s));
   $('kindChips').innerHTML=KINDS.map(k=>`<button class="chip${k.id!=='all'?' kc-'+k.id:''}" data-kind="${k.id}" aria-pressed="${S.kind===k.id}">${k.id!=='all'?'<span class="kdot"></span>':''}${k.name}<small class="num">${base.filter(k.match).length}</small></button>`).join('');
   const list=byKind.slice().sort(kgSort);
-  let html='',last=null;
+  let html='',last=null,lastGy=null;
   list.forEach(s=>{
     const g=kg(s);
-    if(g!==last){last=g;html+=`<div class="grp kh k-${g}"><span>${KG_META[g].n}</span><span class="num">${list.filter(x=>kg(x)===g).length}校</span></div>`;}
+    if(g!==last){last=g;lastGy=null;html+=`<div class="grp kh k-${g}" data-ksec="1"><span>${KG_META[g].n}</span><span class="num">${list.filter(x=>kg(x)===g).length}校</span></div>`;}
+    const gy=gyo(s.kana); if(gy!==lastGy){lastGy=gy;html+=`<div class="gy" data-gyo="${gy}">${gy}</div>`;}
     html+=`<button class="school k-${g}" data-school="${s.id}" aria-pressed="${s.id===S.school}">
       <span class="t">${KIND_TAG[s.kind]}</span>
       <span class="n"><span class="pf">${esc(s.pref)}</span>${esc(s.full)}${needCity(s)?`<em class="pm-city">${esc(s.city)}</em>`:''}</span></button>`;
   });
   $('schoolList').innerHTML=list.length?html:`<p class="empty-note">${q?'「'+esc(S.q)+'」に当てはまる取扱い校はありません':'この条件の取扱い校はありません'}</p>`;
+  { const have=new Set(list.map(x=>gyo(x.kana))); $('gyoIndex').innerHTML=GYO.map(([g])=>g+'行').map(g=>`<button data-ngyo="${g}" ${have.has(g)?'':'disabled'}>${g.replace('行','')}</button>`).join(''); }
   $('countNote').textContent=`取扱い校 全${SCHOOLS.length}校`;
   $('curSchool').textContent=school()?school().disp:'';
   const col=$('picker').classList.contains('collapsed');
   $('toggleList').hidden=!school(); $('toggleList').textContent=col?'変更':'閉じる';
 }
 
+
+/* 通常画面：あかさたなで一覧の該当行へ飛ぶ（今見ている種別の中を優先） */
+function jumpGyo(g){
+  const list=$('schoolList'); const inner=list.scrollHeight>list.clientHeight+4;
+  const ref=(inner?list.getBoundingClientRect().top:0)+(inner?40:80);
+  const heads=[...list.querySelectorAll('[data-ksec]')]; if(!heads.length) return;
+  let cur=0; heads.forEach((h,i)=>{ if(h.getBoundingClientRect().top<=ref) cur=i; });
+  const marks=[...list.querySelectorAll('[data-gyo]')];
+  const inSec=i=>m=>{ const a=heads[i], b=heads[i+1]; return (a.compareDocumentPosition(m)&4)&&(!b||(m.compareDocumentPosition(b)&4)); };
+  let el=null; for(const i of [cur,...heads.map((_,i)=>i).filter(i=>i!==cur)]){ el=marks.find(m=>m.dataset.gyo===g&&inSec(i)(m)); if(el) break; }
+  if(!el) return;
+  if(inner){ list.scrollTo({top:list.scrollTop+el.getBoundingClientRect().top-list.getBoundingClientRect().top-4,behavior:'smooth'}); }
+  else { window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-64,behavior:'smooth'}); }
+}
 /* ============ 学校カード ============ */
 function renderSchool(){
   const s=school();
@@ -564,6 +586,7 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b||b.closest('#sheet')||b.closest('#pm')) return;
   const d=b.dataset;
   if(d.school){selectSchool(d.school);pushRecent(d.school);$('picker').classList.add('collapsed');render();window.scrollTo({top:0});return;}
+  if(d.ngyo){ jumpGyo(d.ngyo); return; }
   if(d.kind){S.kind=d.kind;renderPicker();return;}
   if(d.area){S.area=d.area;renderPicker();return;}
   if(d.pick){S.item=d.pick;if(d.pg)S.gender=d.pg;resetVars();S.sizes.clear();render();return;}
