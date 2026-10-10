@@ -310,6 +310,7 @@ body.pm-open{overflow:hidden}
 .pm-kinds{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
 .pm-kinds button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;height:48px;font-size:15px;font-weight:700;padding:0;border-bottom:4px solid var(--kc,var(--line))}
 .pm-kinds button.on{background:var(--kc,var(--ink));color:#fff;border-color:var(--kc,var(--ink))}
+.pm-top-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:36;border:0;border-radius:999px;background:var(--ink);color:var(--surface);height:56px;padding:0 18px 0 14px;display:flex;align-items:center;gap:6px;font-weight:900;font-size:16px;box-shadow:0 6px 18px rgba(10,15,25,.3)}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -366,6 +367,7 @@ body.pm-open{overflow:hidden}
   <div class="logs" id="logs"></div>
 </aside>
 <div class="pm" id="pm" hidden aria-label="電話モード"></div>
+<button class="pm-top-btn" id="pmTop" hidden aria-label="一番上に戻る"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 5.5 5.3 12.2a1 1 0 1 0 1.4 1.4L11 9.3V19a1 1 0 1 0 2 0V9.3l4.3 4.3a1 1 0 0 0 1.4-1.4Z"/></svg>TOP</button>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -649,11 +651,11 @@ const PM={step:'school',city:null,q:'',kind:'all'};
 const PM_STEPS=['school','gender','item','kind','size','confirm'];
 const PM_TITLE={school:'どこの学校ですか？',gender:'男子ですか、女子ですか？',item:'何をお探しですか？',kind:'季節・種類は？',size:'サイズは？',confirm:'この内容で復唱してください'};
 function pmHasKind(){ const it=curItem(); return !!it&&(isGym(it)||it.v.length>0); }
-function pmGo(step){ PM.step=step; renderPM(); $('pm').scrollTop=0; }
+function pmGo(step){ PM.step=step; renderPM(); $('pm').scrollTop=0; pmTopUpdate(); }
 function pmNext(){ const i=PM_STEPS.indexOf(PM.step); let n=PM_STEPS[i+1]; if(n==='kind'&&!pmHasKind()) n='size'; pmGo(n); }
 function pmBack(){ const i=PM_STEPS.indexOf(PM.step); if(i<=0){ if(PM.city&&!PM.q){PM.city=null;renderPM();} return; } let n=PM_STEPS[i-1]; if(n==='kind'&&!pmHasKind()) n='item'; pmGo(n); }
 function openPM(){ PM.step=school()?'gender':'school'; PM.city=null; PM.q=''; $('pm').hidden=false; document.body.classList.add('pm-open'); renderPM(); }
-function closePM(){ $('pm').hidden=true; document.body.classList.remove('pm-open'); $('picker').classList.toggle('collapsed',!!school()); render(); }
+function closePM(){ $('pm').hidden=true; $('pmTop').hidden=true; document.body.classList.remove('pm-open'); $('picker').classList.toggle('collapsed',!!school()); render(); }
 function pmSizeText(){ const s=school(),it=curItem(); if(!s||!it) return ''; const z=sizeList(s,it).filter(z=>S.sizes.has(z.key)).map(z=>z.text); if(S.sizeFree.trim()) z.push(S.sizeFree.trim()); return z.join('・'); }
 function pmItemText(){ const it=curItem(); if(!it) return ''; const bits=[]; if(isGym(it)&&S.season) bits.push(S.season+(S.gparts.size?'：'+[...S.gparts].join('・'):'')); if(S.vars.size) bits.push([...S.vars].join('・')); return it.n+(bits.length?'（'+bits.join('／')+'）':''); }
 function pmCrumbs(){
@@ -755,6 +757,10 @@ $('pm').addEventListener('click',e=>{
   if(d.pnew){ resetAll(); PM.step='school'; PM.city=null; PM.q=''; renderPM(); $('pm').scrollTop=0; return; }
 });
 $('openPM').onclick=openPM;
+function pmTopUpdate(){ $('pmTop').hidden=$('pm').hidden||$('pm').scrollTop<300; }
+$('pm').addEventListener('scroll',pmTopUpdate,{passive:true});
+$('pmTop').onclick=()=>{ $('pm').scrollTo({top:0,behavior:'smooth'}); };
+
 
 renderLogs(); render();
 </script>
