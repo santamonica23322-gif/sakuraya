@@ -248,7 +248,8 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
 .v-status{margin:0;font-size:13px;color:var(--muted);min-height:1.4em}
 .v-status.err{color:var(--accent)}.v-status.ok{color:var(--ok)}.v-status.live{color:#1E8A3A;font-weight:700}
 .v-text{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:17px;min-height:52px}
-.v-text.ph{color:var(--muted);font-size:14px}
+.v-text{width:100%;resize:vertical;font-family:inherit;color:var(--ink)}
+.v-text.kb{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .v-result{display:grid;gap:6px}
 .vrow{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding:4px 2px}
 .vrow span{font-size:12px;color:var(--muted)}.vrow b{font-size:16px}.vrow b.miss{color:var(--muted);font-weight:400}
@@ -317,7 +318,7 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
   <p class="v-hint">例：「丸亀の西中、女子のセーラー、冬の165」</p>
   <button class="v-mic" id="vMic"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.59a6 6 0 0 0 5-5.91Z"/></svg><b>押して話す</b></button>
   <p class="v-status" id="vStatus"></p>
-  <div class="field"><span class="label">聞き取った言葉</span><div class="v-text" id="vText"></div></div>
+  <div class="field"><label class="label" for="vText">聞き取った言葉（ここをタップして、キーボードのマイクで話すこともできます）</label><textarea class="v-text" id="vText" rows="2" placeholder="ここをタップ → キーボード右下のマイクを押して話す"></textarea></div>
   <div class="field"><span class="label">こう読み取りました</span><div class="v-result" id="vResult"></div></div>
   <div class="btnrow"><button class="btn primary" id="vApply" disabled>この内容で入力</button><button class="btn" id="vRetry">やり直す</button></div>
 </aside>
@@ -690,10 +691,11 @@ function parseVoice(raw,ctxSchool){
 }
 window.__voiceParse=(txt)=>{const p=parseVoice(txt,school());return {school:p.school&&p.school.disp,cands:p.schools.map(x=>x.disp),gender:p.gender,item:p.item&&p.item.n,season:p.season,gparts:p.gparts,vars:p.vars,sizes:p.sizes};};
 
+const KB_MSG='この開き方では「押して話す」が使えません。かわりに下の「聞き取った言葉」の欄をタップし、キーボード右下のマイクを押して話してください。';
+function kbMode(){ const t=$('vText'); t.focus(); t.classList.add('kb'); }
 function vSet(msg,cls){ const el=$('vStatus'); el.textContent=msg; el.className='v-status '+(cls||''); }
 function renderVoice(){
-  $('vText').textContent=vText||'（ここに聞き取った言葉が出ます）';
-  $('vText').classList.toggle('ph',!vText);
+  if(document.activeElement!==$('vText')) $('vText').value=vText;
   $('vMic').classList.toggle('on',recOn); $('vMic').querySelector('b').textContent=recOn?'聞き取り中… 押すと止める':'押して話す';
   const p=vParsed; const box=$('vResult');
   if(!p){box.innerHTML='';$('vApply').disabled=true;return;}
@@ -706,20 +708,20 @@ function renderVoice(){
   box.innerHTML=row('学校',schoolCell,!!(p.school||school()))+alt+row('性別',p.gender?p.gender+'子':'聞き取れず',!!p.gender)+row('品目',itemTxt,!!p.item)+row('サイズ',p.sizes.length?esc(p.sizes.join('・')):'聞き取れず',!!p.sizes.length);
   $('vApply').disabled=!(p.school||school());
 }
-function openVoice(){ $('vsheet').hidden=false; $('vscrim').hidden=false; vText='';vParsed=null;
-  if(!SR) vSet('このブラウザでは音声の聞き取りが使えません。iPhoneの「Safari」で開いてください。','err');
+function openVoice(){ $('vsheet').hidden=false; $('vscrim').hidden=false; vText='';vParsed=null; $('vText').value=''; $('vText').classList.remove('kb');
+  if(!SR) vSet(KB_MSG,'err');
   else vSet('「押して話す」を押してから、復唱してください。','');
   renderVoice(); }
 function closeVoice(){ if(rec&&recOn) rec.abort(); recOn=false; $('vsheet').hidden=true; $('vscrim').hidden=true; }
 function startRec(){
-  if(!SR){ vSet('このブラウザでは音声の聞き取りが使えません。iPhoneの「Safari」で開いてください。','err'); return; }
+  if(!SR){ vSet(KB_MSG,'err'); kbMode(); return; }
   rec=new SR(); rec.lang='ja-JP'; rec.interimResults=true; rec.continuous=true; rec.maxAlternatives=1;
   let finalT='';
   rec.onstart=()=>{recOn=true;vSet('聞き取り中…　話し終わったらもう一度押してください','live');renderVoice();};
   rec.onresult=e=>{ let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) finalT+=r[0].transcript; else interim+=r[0].transcript; }
     vText=finalT+interim; vParsed=parseVoice(vText,school()); renderVoice(); };
-  rec.onerror=e=>{ const m={'not-allowed':'マイクの使用が許可されていません。iPhoneの「設定」→「Safari」→「マイク」で「確認」か「許可」にして、もう一度試してください。','service-not-allowed':'音声認識が使えない状態です。「設定」→「一般」→「キーボード」で「音声入力」をオンにし、Safariで開き直してください。','no-speech':'声が聞き取れませんでした。スマホを口に近づけて、もう一度試してください。','network':'ネットにつながっていないため聞き取れません。電波を確認してください。','audio-capture':'マイクが見つかりません。','aborted':'聞き取りを止めました。'}[e.error]||('うまく聞き取れませんでした（'+e.error+'）');
-    vSet(m,e.error==='aborted'?'':'err'); };
+  rec.onerror=e=>{ const m={'not-allowed':KB_MSG,'service-not-allowed':KB_MSG,'no-speech':'声が聞き取れませんでした。スマホを口に近づけて、もう一度試してください。','network':'ネットにつながっていないため聞き取れません。電波を確認してください。','audio-capture':'マイクが見つかりません。','aborted':'聞き取りを止めました。'}[e.error]||('うまく聞き取れませんでした（'+e.error+'）');
+    vSet(m,e.error==='aborted'?'':'err'); if(m===KB_MSG){ kbMode(); } };
   rec.onend=()=>{ recOn=false; if(vText){vParsed=parseVoice(vText,school()); vSet('聞き取りました。内容を確認して「この内容で入力」を押してください。','ok');} renderVoice(); };
   try{ rec.start(); }catch(err){ vSet('聞き取りを始められませんでした：'+err.message,'err'); }
 }
@@ -736,7 +738,8 @@ function applyVoice(){
 $('openVoice').onclick=openVoice; $('vClose').onclick=closeVoice; $('vscrim').onclick=closeVoice;
 $('vMic').onclick=()=>{ if(recOn){ rec.stop(); } else { vText='';vParsed=null;renderVoice(); startRec(); } };
 $('vApply').onclick=applyVoice;
-$('vRetry').onclick=()=>{ if(rec&&recOn) rec.abort(); vText='';vParsed=null; vSet('「押して話す」を押してから、復唱してください。',''); renderVoice(); };
+$('vText').addEventListener('input',e=>{ vText=e.target.value; vParsed=vText.trim()?parseVoice(vText,school()):null; renderVoice(); if(vText.trim()) vSet('読み取りました。内容を確認して「この内容で入力」を押してください。','ok'); });
+$('vRetry').onclick=()=>{ if(rec&&recOn) rec.abort(); vText='';vParsed=null; $('vText').value=''; vSet('「押して話す」を押してから、復唱してください。',''); renderVoice(); };
 $('vResult').addEventListener('click',e=>{const b=e.target.closest('[data-vschool]');if(!b||!vParsed)return;const s=SCHOOLS.find(x=>x.id===b.dataset.vschool);vParsed=parseVoice(vText,s);vParsed.school=s;if(!vParsed.schools.includes(s))vParsed.schools.unshift(s);renderVoice();});
 
 renderLogs(); render();
