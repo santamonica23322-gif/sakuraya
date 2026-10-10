@@ -284,6 +284,7 @@ body.pm-open{overflow:hidden}
 .pm-fukusho{margin:0;font-size:19px;line-height:1.6;background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-weight:700}
 .pm-primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);align-items:center}
 .pm-index{position:sticky;top:-10px;z-index:2;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;background:var(--bg);padding:8px 0}
+.pm-index button[disabled]{opacity:.3}
 .pm-index button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;height:44px;font-size:17px;font-weight:700;padding:0}
 .pm-city{font-style:normal;display:inline-block;margin-left:6px;font-size:.78em;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:1px 7px;vertical-align:middle}
 .pm-school{flex-direction:column;align-items:flex-start}
@@ -680,10 +681,10 @@ function pmSchoolResults(){
     body+=`<div class="pm-kinds">${kinds.map(k=>`<button class="${k!=='all'?'kc-'+k:''}${PM.kind===k?' on':''}" data-pkind="${k}">${k==='all'?'すべて':KG_META[k].sh}</button>`).join('')}</div>`;
     const all=SCHOOLS.filter(x=>PM.kind==='all'||kg(x)===PM.kind).sort(kgSort);
     const sections=[]; all.forEach(x=>{const k=kg(x); let S2=sections.find(y=>y.k===k); if(!S2){S2={k,list:[]};sections.push(S2);} S2.list.push(x);});
-    if(PM.kind!=='all'){ const gs=[...new Set(all.map(x=>gyo(x.kana)))]; body+=`<div class="pm-index">${gs.map(g=>`<button data-pgyo="${PM.kind}-${g}">${g.replace('行','')}</button>`).join('')}</div>`; }
+    { const have=new Set(all.map(x=>gyo(x.kana))); body+=`<div class="pm-index">${GYO.map(([g])=>g+'行').map(g=>`<button data-pgyo="${g}" ${have.has(g)?'':'disabled'}>${g.replace('行','')}</button>`).join('')}</div>`; }
     body+=sections.map(S2=>{
       let h=`<h3 class="pm-kh k-${S2.k}" id="pmk-${S2.k}">${KG_META[S2.k].n}<small>${S2.list.length}校</small></h3>`; let lastG=null;
-      S2.list.forEach(x=>{const g=gyo(x.kana); if(g!==lastG){lastG=g; h+=`<p class="pm-gyo" id="pmg-${S2.k}-${g}">${g}</p>`;} h+=pmSchoolBtn(x);});
+      S2.list.forEach(x=>{const g=gyo(x.kana); if(g!==lastG){lastG=g; h+=`<p class="pm-gyo" data-gyo="${g}">${g}</p>`;} h+=pmSchoolBtn(x);});
       return `<div class="pm-sec">${h}</div>`;
     }).join('');
   }
@@ -733,7 +734,12 @@ $('pm').addEventListener('click',e=>{
   if(d.pback){pmBack();return;}
   if(d.pgo){ if(d.pgo==='school'){PM.city=null;PM.q='';} pmGo(d.pgo==='item'&&PM.step==='confirm'?'item':d.pgo); return; }
   if(d.pkind){PM.kind=d.pkind;pmSchoolResults();$('pm').scrollTop=0;return;}
-  if(d.pgyo){const el=document.getElementById('pmg-'+d.pgyo); if(el){ const pm=$('pm'); pm.scrollTo({top:el.offsetTop-120,behavior:'smooth'}); } return;}
+  if(d.pgyo){ const pm=$('pm'); const secs=[...pm.querySelectorAll('.pm-sec')]; if(!secs.length) return;
+    // 今見ている種別（画面上部にある区切り）の中で、その行に飛ぶ
+    let cur=secs[0]; secs.forEach(x=>{ if(x.offsetTop<=pm.scrollTop+160) cur=x; });
+    const order=[cur,...secs.filter(x=>x!==cur)];
+    let el=null; for(const sec of order){ el=sec.querySelector(`[data-gyo="${d.pgyo}"]`); if(el) break; }
+    if(el) pm.scrollTo({top:el.offsetTop-120,behavior:'smooth'}); return; }
   if(d.pschool){ selectSchool(d.pschool); pushRecent(d.pschool); PM.q=''; PM.city=null; pmGo('gender'); return; }
   if(d.pgender){ S.gender=d.pgender; const it=curItem(); if(!it||!gOk(it,S.gender)){S.item='';} pmGo('item'); return; }
   if(d.pitem){ S.item=d.pitem; resetVars(); S.sizes.clear(); S.sizeFree=''; pmNext(); return; }
