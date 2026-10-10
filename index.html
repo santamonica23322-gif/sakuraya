@@ -283,6 +283,13 @@ body.pm-open{overflow:hidden}
 .pm-sum-row span{font-size:12px;color:var(--muted)}.pm-sum-row b{font-size:19px;line-height:1.35}.pm-sum-row b.thin{font-size:14px;font-weight:400}
 .pm-fukusho{margin:0;font-size:19px;line-height:1.6;background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-weight:700}
 .pm-primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);align-items:center}
+.pm-index{position:sticky;top:-10px;z-index:2;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;background:var(--bg);padding:8px 0}
+.pm-index button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;height:44px;font-size:17px;font-weight:700;padding:0}
+.pm-gyo{font-size:15px;font-weight:900;margin:10px 0 0;display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.pm-gyo small{font-size:12px;font-weight:400;color:var(--muted)}
+.pm-city{font-style:normal;display:inline-block;margin-left:6px;font-size:.78em;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:1px 7px;vertical-align:middle}
+.pm-school{flex-direction:column;align-items:flex-start}
+.pm-school .pm-city{margin-left:0;margin-top:3px}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -441,7 +448,7 @@ function renderPicker(){
     if(g!==last){last=g;html+=`<div class="grp"><span>${esc(g)}</span><span class="num">${list.filter(x=>x.city===g).length}校</span></div>`;}
     html+=`<button class="school" data-school="${s.id}" aria-pressed="${s.id===S.school}">
       <span class="t">${KIND_TAG[s.kind]}</span>
-      <span class="n"><span class="pf">${esc(s.pref)}</span>${esc(s.full)}</span></button>`;
+      <span class="n"><span class="pf">${esc(s.pref)}</span>${esc(s.full)}${needCity(s)?`<em class="pm-city">${esc(s.city)}</em>`:''}</span></button>`;
   });
   $('schoolList').innerHTML=list.length?html:`<p class="empty-note">${q?'「'+esc(S.q)+'」に当てはまる取扱い校はありません':'この条件の取扱い校はありません'}</p>`;
   $('countNote').textContent=`取扱い校 全${SCHOOLS.length}校`;
@@ -635,21 +642,26 @@ function pmCrumbs(){
     ['item','品目',s&&PM_STEPS.indexOf(PM.step)>2?pmItemText():''],['size','サイズ',PM.step==='confirm'?(pmSizeText()||'未定'):'']];
   return `<div class="pm-crumbs">${cells.map(([k,l,v])=>`<button class="pm-crumb${PM.step===k||(k==='item'&&PM.step==='kind')?' cur':''}" data-pgo="${k}" ${v||k==='school'?'':'disabled'}><small>${l}</small><b>${esc(v||'—')}</b></button>`).join('')}</div>`;
 }
-function pmSchoolBtn(s){ return `<button class="pm-btn pm-school" data-pschool="${s.id}"><small>${esc(s.pref)}</small>${esc(s.full)}</button>`; }
+function pmSchoolBtn(s){ return `<button class="pm-btn pm-school" data-pschool="${s.id}"><small>${esc(s.pref)}</small>${esc(s.full)}${needCity(s)?`<em class="pm-city">${esc(s.city)}</em>`:''}</button>`; }
+/* 区別しにくい学校名（同名・東西南北など）には市町名を付ける */
+const NAME_COUNT={}; SCHOOLS.forEach(x=>{NAME_COUNT[x.full]=(NAME_COUNT[x.full]||0)+1;});
+const VAGUE=/^(東|西|南|北|中央|東部|西部|南部|北部|中部)(小学校|中学校|幼稚園|保育所|保育園|こども園)$/;
+const needCity=x=>NAME_COUNT[x.full]>1||VAGUE.test(x.full);
+const schoolLabel=x=>x.full+(needCity(x)?`（${x.city}）`:'');
 function pmSchoolResults(){
   const box=$('pmResults'); if(!box) return; let body='';
   const terms=PM.q.trim().split(/[\s\u3000]+/).map(norm).filter(Boolean);
   if(terms.length){
     const hits=SCHOOLS.filter(x=>terms.every(t=>hayOf(x).includes(t))).slice(0,30);
-    body=hits.length?`<div class="pm-grid one">${hits.map(pmSchoolBtn).join('')}</div>`:`<p class="pm-note">見つかりません。文字を消して、市町から選んでください。</p>`;
-  }else if(PM.city){
-    const list=SCHOOLS.filter(x=>x.city===PM.city).sort((a,b)=>a.kana.localeCompare(b.kana,'ja'));
-    body=`<p class="pm-sub">${esc(PM.city)}の学校（${list.length}校）</p><div class="pm-grid one">${list.map(pmSchoolBtn).join('')}</div>`;
+    body=hits.length?`<div class="pm-grid one">${hits.map(pmSchoolBtn).join('')}</div>`:`<p class="pm-note">見つかりません。文字を消すと、あいうえお順の一覧から選べます。</p>`;
   }else{
     const rs=recent.map(id=>SCHOOLS.find(x=>x.id===id)).filter(Boolean);
     if(rs.length) body+=`<p class="pm-sub">最近の学校</p><div class="pm-grid one">${rs.map(pmSchoolBtn).join('')}</div>`;
-    const cities=[...new Set(SCHOOLS.map(x=>x.city))].sort((a,b)=>cityKana(a).localeCompare(cityKana(b),'ja'));
-    body+=`<p class="pm-sub">市町から選ぶ</p><div class="pm-grid">${cities.map(c=>`<button class="pm-btn" data-pcity="${esc(c)}">${esc(c)}<small>${SCHOOLS.filter(x=>x.city===c).length}校</small></button>`).join('')}</div>`;
+    const KO={'保育所':0,'小規模保育':0,'事業所内保育':0,'認定こども園':1,'幼稚園':2,'小学校':3,'中学校':4,'高等学校':5,'高専':6,'特別支援学校':7};
+    const all=[...SCHOOLS].sort((a,b)=>a.kana.localeCompare(b.kana,'ja')||KO[a.kind]-KO[b.kind]||cityKana(a.city).localeCompare(cityKana(b.city),'ja'));
+    const groups=[]; all.forEach(x=>{const g=gyo(x.kana); let G=groups.find(y=>y.g===g); if(!G){G={g,list:[]};groups.push(G);} G.list.push(x);});
+    body+=`<p class="pm-sub">あいうえお順（${all.length}校）</p><div class="pm-index">${groups.map(G=>`<button data-pgyo="${G.g}">${G.g.replace('行','')}</button>`).join('')}</div>`;
+    body+=groups.map(G=>`<h3 class="pm-gyo" id="pmg-${G.g}">${G.g}<small>${G.list.length}校</small></h3><div class="pm-grid one">${G.list.map(pmSchoolBtn).join('')}</div>`).join('');
   }
   box.innerHTML=body;
 }
@@ -696,7 +708,7 @@ $('pm').addEventListener('click',e=>{
   if(d.pexit){closePM();return;}
   if(d.pback){pmBack();return;}
   if(d.pgo){ if(d.pgo==='school'){PM.city=null;PM.q='';} pmGo(d.pgo==='item'&&PM.step==='confirm'?'item':d.pgo); return; }
-  if(d.pcity){PM.city=d.pcity;renderPM();$('pm').scrollTop=0;return;}
+  if(d.pgyo){const el=document.getElementById('pmg-'+d.pgyo); if(el){ const pm=$('pm'); pm.scrollTo({top:el.offsetTop-70,behavior:'smooth'}); } return;}
   if(d.pschool){ selectSchool(d.pschool); pushRecent(d.pschool); PM.q=''; PM.city=null; pmGo('gender'); return; }
   if(d.pgender){ S.gender=d.pgender; const it=curItem(); if(!it||!gOk(it,S.gender)){S.item='';} pmGo('item'); return; }
   if(d.pitem){ S.item=d.pitem; resetVars(); S.sizes.clear(); S.sizeFree=''; pmNext(); return; }
