@@ -696,7 +696,7 @@ function kbMode(){ const t=$('vText'); t.focus(); t.classList.add('kb'); }
 function vSet(msg,cls){ const el=$('vStatus'); el.textContent=msg; el.className='v-status '+(cls||''); }
 function renderVoice(){
   if(document.activeElement!==$('vText')) $('vText').value=vText;
-  $('vMic').classList.toggle('on',recOn); $('vMic').querySelector('b').textContent=recOn?'聞き取り中… 押すと止める':'押して話す';
+  $('vMic').classList.toggle('on',recOn); $('vMic').querySelector('b').textContent=useKb()?'押して、キーボードのマイクで話す':(recOn?'聞き取り中… 押すと止める':'押して話す');
   const p=vParsed; const box=$('vResult');
   if(!p){box.innerHTML='';$('vApply').disabled=true;return;}
   const s=p.school||school();
@@ -709,7 +709,7 @@ function renderVoice(){
   $('vApply').disabled=!(p.school||school());
 }
 function openVoice(){ $('vsheet').hidden=false; $('vscrim').hidden=false; vText='';vParsed=null; $('vText').value=''; $('vText').classList.remove('kb');
-  if(!SR) vSet(KB_MSG,'err');
+  if(useKb()) vSet('赤いボタンを押すとキーボードが出ます。右下のマイクのボタンを押して、復唱してください。','');
   else vSet('「押して話す」を押してから、復唱してください。','');
   renderVoice(); }
 function closeVoice(){ if(rec&&recOn) rec.abort(); recOn=false; $('vsheet').hidden=true; $('vscrim').hidden=true; }
@@ -721,7 +721,7 @@ function startRec(){
   rec.onresult=e=>{ let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) finalT+=r[0].transcript; else interim+=r[0].transcript; }
     vText=finalT+interim; vParsed=parseVoice(vText,school()); renderVoice(); };
   rec.onerror=e=>{ const m={'not-allowed':KB_MSG,'service-not-allowed':KB_MSG,'no-speech':'声が聞き取れませんでした。スマホを口に近づけて、もう一度試してください。','network':'ネットにつながっていないため聞き取れません。電波を確認してください。','audio-capture':'マイクが見つかりません。','aborted':'聞き取りを止めました。'}[e.error]||('うまく聞き取れませんでした（'+e.error+'）');
-    vSet(m,e.error==='aborted'?'':'err'); if(m===KB_MSG){ kbMode(); } };
+    vSet(m,e.error==='aborted'?'':'err'); if(m===KB_MSG){ srBroken=true; try{localStorage.setItem('sakuraya-sr-broken','1');}catch(_){} kbMode(); renderVoice(); } };
   rec.onend=()=>{ recOn=false; if(vText){vParsed=parseVoice(vText,school()); vSet('聞き取りました。内容を確認して「この内容で入力」を押してください。','ok');} renderVoice(); };
   try{ rec.start(); }catch(err){ vSet('聞き取りを始められませんでした：'+err.message,'err'); }
 }
@@ -736,7 +736,11 @@ function applyVoice(){
   toast('音声の内容を入力しました。違うところはタップで直せます');
 }
 $('openVoice').onclick=openVoice; $('vClose').onclick=closeVoice; $('vscrim').onclick=closeVoice;
-$('vMic').onclick=()=>{ if(recOn){ rec.stop(); } else { vText='';vParsed=null;renderVoice(); startRec(); } };
+const isStandalone=()=>window.navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+let srBroken=false; try{srBroken=localStorage.getItem('sakuraya-sr-broken')==='1';}catch(_){}
+const useKb=()=>!SR||isStandalone()||srBroken;
+function kbFocus(){ const t=$('vText'); t.classList.add('kb'); t.focus(); vSet('キーボードが出たら、右下のマイクのボタンを押して話してください。','live'); }
+$('vMic').onclick=()=>{ if(useKb()){ kbFocus(); return; } if(recOn){ rec.stop(); } else { vText='';vParsed=null;renderVoice(); startRec(); } };
 $('vApply').onclick=applyVoice;
 $('vText').addEventListener('input',e=>{ vText=e.target.value; vParsed=vText.trim()?parseVoice(vText,school()):null; renderVoice(); if(vText.trim()) vSet('読み取りました。内容を確認して「この内容で入力」を押してください。','ok'); });
 $('vRetry').onclick=()=>{ if(rec&&recOn) rec.abort(); vText='';vParsed=null; $('vText').value=''; vSet('「押して話す」を押してから、復唱してください。',''); renderVoice(); };
