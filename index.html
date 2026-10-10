@@ -237,25 +237,52 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
 .reset-btn:hover{border-color:var(--muted)}
 .day-chips{gap:6px}
 .day-chips .chip small{font-size:11px;opacity:.7;margin-left:4px}
-.voice-fab{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:30;border:0;border-radius:999px;background:var(--ink);color:var(--surface);height:58px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;box-shadow:0 6px 20px rgba(10,15,25,.28)}
-.vsheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow-y:auto;background:var(--surface);z-index:41;border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);max-width:640px;margin:0 auto}
-.beta{font-size:11px;font-weight:700;color:var(--warn);border:1px dashed var(--warn);border-radius:6px;padding:1px 6px;vertical-align:middle;font-family:var(--f-body)}
-.v-hint{margin:0;color:var(--muted);font-size:13px}
-.v-mic{border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);min-height:84px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:18px}
-.v-mic.on{background:#1E8A3A;color:#fff;animation:pulse 1.2s ease-in-out infinite}
-@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(30,138,58,.18)}}
-@media (prefers-reduced-motion:reduce){.v-mic.on{animation:none}}
-.v-status{margin:0;font-size:13px;color:var(--muted);min-height:1.4em}
-.v-status.err{color:var(--accent)}.v-status.ok{color:var(--ok)}.v-status.live{color:#1E8A3A;font-weight:700}
-.v-text{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:17px;min-height:52px}
-.v-text{width:100%;resize:vertical;font-family:inherit;color:var(--ink)}
-.v-text.kb{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.v-result{display:grid;gap:6px}
-.vrow{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding:4px 2px}
-.vrow span{font-size:12px;color:var(--muted)}.vrow b{font-size:16px}.vrow b.miss{color:var(--muted);font-weight:400}
-.valt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
 .btn[disabled]{opacity:.45}
-.app{padding-bottom:96px}
+.pm-launch-wrap{max-width:1280px;margin:0 auto;padding:12px 16px 0}
+.pm-launch{width:100%;border:0;border-radius:14px;background:var(--ink);color:var(--surface);min-height:64px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:18px;font-weight:700;flex-wrap:wrap;padding:8px 14px}
+.pm-launch small{font-size:12px;font-weight:400;opacity:.75;flex-basis:100%;text-align:center;margin-top:-4px}
+.pm{position:fixed;inset:0;z-index:35;background:var(--bg);overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:12px}
+body.pm-open{overflow:hidden}
+.pm>*{width:100%;max-width:720px;margin-left:auto;margin-right:auto}
+.pm-top{display:flex;align-items:center;gap:8px;min-height:44px}
+.pm-mode{font-family:var(--f-disp);font-size:16px;margin-right:auto}
+.pm-back{border:0;background:var(--chip);color:var(--chip-ink);border-radius:999px;height:44px;padding:0 16px;font-weight:700;font-size:16px}
+.pm-exit{border:1px solid var(--line);background:var(--surface);border-radius:999px;height:40px;padding:0 14px;font-size:13px}
+.pm-crumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.pm-crumb{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px 8px;text-align:left;display:grid;gap:1px;min-width:0}
+.pm-crumb small{font-size:10px;color:var(--muted)}
+.pm-crumb b{font-size:12px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm-crumb.cur{border-color:var(--accent);background:var(--accent-soft)}
+.pm-crumb[disabled]{opacity:.5}
+.pm-q{font-size:24px;font-weight:900;line-height:1.3;margin-top:4px}
+.pm-body{display:flex;flex-direction:column;gap:12px}
+.pm-sub{margin:4px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
+.pm-note{margin:0;color:var(--muted)}
+.pm-search{width:100%;height:54px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 16px;font-size:18px}
+.pm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pm-grid.one{grid-template-columns:1fr}.pm-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.pm-btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:14px;min-height:64px;padding:10px 14px;font-size:19px;font-weight:700;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:2px;box-shadow:var(--shadow)}
+.pm-btn small{font-size:12px;font-weight:400;color:var(--muted)}
+.pm-btn:active{background:var(--accent-soft);border-color:var(--accent)}
+.pm-btn.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pm-btn.on small{color:var(--surface)}
+.pm-school small{order:-1}
+.pm-huge{min-height:96px;font-size:28px;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px}
+.pm-huge .gmark{width:16px;height:16px;border-radius:5px}
+.pm-big{min-height:84px;font-size:24px;align-items:center;text-align:center}
+.pm-size{flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;font-size:20px}
+.pm-size .sdot{width:28px;height:28px}
+.pm-size small{display:block}
+.pm-next{border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);min-height:60px;font-size:18px;font-weight:700}
+.pm-next.sm{min-height:54px;padding:0 20px;white-space:nowrap;flex:none}
+.pm-skip{border:0;background:transparent;color:var(--muted);text-decoration:underline;min-height:48px;font-size:15px}
+.pm-free{display:flex;gap:8px}
+.pm-sum{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:6px 14px}
+.pm-sum-row{display:grid;grid-template-columns:56px 1fr;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.pm-sum-row:last-child{border-bottom:0}
+.pm-sum-row span{font-size:12px;color:var(--muted)}.pm-sum-row b{font-size:19px;line-height:1.35}.pm-sum-row b.thin{font-size:14px;font-weight:400}
+.pm-fukusho{margin:0;font-size:19px;line-height:1.6;background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-weight:700}
+.pm-primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);align-items:center}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -268,6 +295,7 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
   <button class="memo-btn" id="openMemo">通話メモ <span class="cnt num" id="memoCount">0</span></button>
 </header>
 
+<div class="pm-launch-wrap"><button class="pm-launch" id="openPM"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.6a1 1 0 0 1-.25 1Z"/></svg>電話モードで聞き取る<small>1画面ずつ大きなボタンで</small></button></div>
 <main class="app">
   <section class="panel picker" id="picker">
     <div class="picker-head">
@@ -311,17 +339,7 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
   <div class="btnrow"><button class="btn" id="copyDay">この日をコピー</button><button class="btn" id="copyMemo">全件コピー</button></div>
   <div class="logs" id="logs"></div>
 </aside>
-<button class="voice-fab" id="openVoice" aria-label="音声で入力"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.59a6 6 0 0 0 5-5.91Z"/></svg><span>音声入力</span></button>
-<div class="scrim" id="vscrim" hidden></div>
-<aside class="vsheet" id="vsheet" hidden aria-label="音声入力">
-  <div class="sheet-head"><h2>音声入力 <small class="beta">テスト版</small></h2><button class="x" id="vClose" aria-label="閉じる">×</button></div>
-  <p class="v-hint">例：「丸亀の西中、女子のセーラー、冬の165」</p>
-  <button class="v-mic" id="vMic"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.59a6 6 0 0 0 5-5.91Z"/></svg><b>押して話す</b></button>
-  <p class="v-status" id="vStatus"></p>
-  <div class="field"><label class="label" for="vText">聞き取った言葉（ここをタップして、キーボードのマイクで話すこともできます）</label><textarea class="v-text" id="vText" rows="2" placeholder="ここをタップ → キーボード右下のマイクを押して話す"></textarea></div>
-  <div class="field"><span class="label">こう読み取りました</span><div class="v-result" id="vResult"></div></div>
-  <div class="btnrow"><button class="btn primary" id="vApply" disabled>この内容で入力</button><button class="btn" id="vRetry">やり直す</button></div>
-</aside>
+<div class="pm" id="pm" hidden aria-label="電話モード"></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -514,9 +532,9 @@ function selectSchool(id){
   resetVars(); S.sizes.clear(); S.sizeFree='';
 }
 document.addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(!b||b.closest('#sheet')) return;
+  const b=e.target.closest('button'); if(!b||b.closest('#sheet')||b.closest('#pm')) return;
   const d=b.dataset;
-  if(d.school){selectSchool(d.school);$('picker').classList.add('collapsed');render();window.scrollTo({top:0});return;}
+  if(d.school){selectSchool(d.school);pushRecent(d.school);$('picker').classList.add('collapsed');render();window.scrollTo({top:0});return;}
   if(d.kind){S.kind=d.kind;renderPicker();return;}
   if(d.area){S.area=d.area;renderPicker();return;}
   if(d.pick){S.item=d.pick;if(d.pg)S.gender=d.pg;resetVars();S.sizes.clear();render();return;}
@@ -595,156 +613,105 @@ $('memoDays').addEventListener('click',e=>{const b=e.target.closest('[data-day]'
 $('logs').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;memos.splice(+b.dataset.del,1);persist();renderLogs();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeMemo();});
 
-/* ============ 音声入力（テスト版） ============ */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let rec=null, recOn=false, vText='', vParsed=null;
-const ITEM_SYN=[
-  [/体操服|体操着|ジャージ|体育服|たいそうふく|ハーフパンツ|トレパン|トレシャツ/,['体操服']],
-  [/学ラン|がくらん|詰襟|詰め襟|つめえり|学生服/,['学ラン','学生服']],
-  [/セーラー/,['セーラー']],[/ジャンパースカート|ジャンスカ/,['ジャンパースカート']],[/スカート/,['スカート']],
-  [/ブレザー|ブレーザー/,['ブレザー']],[/ジャケット/,['ジャケット']],[/半ズボン|短パン/,['半ズボン']],[/ズボン|スラックス|(?<!ハーフ|トレ)パンツ/,['ズボン','半ズボン']],[/ネクタイ/,['ネクタイ']],[/リボン/,['リボン']],[/ベスト/,['ベスト']],
-  [/セーター/,['セーター']],[/カーディガン/,['カーディガン']],[/ブラウス/,['ブラウス']],[/ポロ/,['ポロシャツ','ポロ','半袖ポロ']],
-  [/カッター|ワイシャツ|シャツ/,['シャツ','長袖シャツ','半袖シャツ','開襟シャツ']],[/コート/,['コート']],[/ウインドブレーカー/,['ウインドブレーカー']]
-];
-function vNorm(t){
-  let x=String(t||'').normalize('NFKC').replace(/[\s、。,.]/g,'');
-  x=x.replace(/エスエス/g,'SS').replace(/(スリー|3)エル/g,'3L').replace(/(フォー|4)エル/g,'4L').replace(/(ファイブ|5)エル/g,'5L')
-     .replace(/エルエル|ダブルエル/g,'LL').replace(/エル/g,'L').replace(/エム/g,'M').replace(/エス(?!テ)/g,'S');
-  return x;
-}
-function schoolKeys(s){
-  const cb=s.city.replace(/(市|町)$/,'');
-  const shortB=s.short.replace(/(小|中|高)$/,''); const suf=(s.short.match(/(小|中|高)$/)||[''])[0];
-  const keys=new Set([s.full,s.short,s.name]);
-  if(suf){ const sfx={小:['小学校','小学','小'],中:['中学校','中学','中'],高:['高等学校','高校','高']}[suf]; sfx.forEach(x=>keys.add(shortB+x)); }
-  keys.add(s.full.replace(/(保育園|保育所|幼稚園|こども園)$/,''));
-  return {keys:[...keys].filter(k=>k&&k.length>=2),cb,kana:s.kana,kanaSuf:s.kana+({小:'しょう',中:'ちゅう',高:'こう'}[suf]||'')};
-}
-function findSchools(t){
-  const th=hira(t);
-  const scored=SCHOOLS.map(s=>{
-    const k=schoolKeys(s); let sc=0;
-    for(const key of k.keys){ if(t.includes(key)) sc=Math.max(sc,key.length*2); }
-    if(k.kana.length>=2&&th.includes(k.kanaSuf)) sc=Math.max(sc,k.kanaSuf.length*2);
-    else if(k.kana.length>=3&&th.includes(k.kana)) sc=Math.max(sc,k.kana.length+1);
-    if(sc&&(t.includes(k.cb)||th.includes(cityKana(s.city).replace(/(し|ちょう)$/,'')))) sc+=4;
-    if(sc&&/中学|中$/.test(t)&&s.kind==='中学校') sc+=1;
-    return {s,sc};
-  }).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc);
-  if(!scored.length) return [];
-  const top=scored[0].sc; return scored.filter(x=>x.sc>=top-1).slice(0,4).map(x=>x.s);
-}
-function rangeOf(label,sub){
-  const txt=label+(sub?' '+sub:''); const nums=(txt.match(/\d+/g)||[]).map(Number);
-  if(!nums.length) return null;
-  if(/^〜|^～/.test(label)||/^〜/.test(sub||'')){const m=Math.max(...nums);return [m-25,m];}
-  if(/以上|〜$|～$/.test(label)||/〜$/.test(sub||'')) return [Math.min(...nums),999];
-  if(/〜|～/.test(label)) return [Math.min(...nums),Math.max(...nums)];
-  return [Math.min(...nums),Math.max(...nums)];
-}
-function matchSize(s,it,t){
-  matchSize.free=[];
-  const list=sizeList(s,it); const hits=new Set();
-  // 札の色
-  const col=(t.match(/(赤|青|黄色|黄|緑)(色)?(の)?シール/)||[])[1]||(/シールなし|シール無し/.test(t)?'none':null);
-  if(col){ const c=col==='黄色'?'黄':col; list.forEach(z=>{ if((c==='none'&&z.dot===null)||z.dot===c) hits.add(z.key); }); }
-  // S/M/L
-  const letters=t.match(/(5L|4L|3L|LL|SS|S|M|L)(?![a-zA-Z])/g)||[];
-  letters.forEach(L=>list.forEach(z=>{ if(z.label===L||z.label.split('／')[0]===L) hits.add(z.key); }));
-  // 数字（年・着・枚・人・円の前は除く）
-  const nums=[...t.matchAll(/(\d{2,3})(?!\d|年|着|枚|人|円|組|番)/g)].map(m=>+m[1]).filter(n=>n>=50&&n<=200);
-  nums.forEach(n=>{
-    let best=null,bd=1e9;
-    list.forEach(z=>{ if(z.label==='フリー')return; const r=rangeOf(z.label,z.sub); if(!r)return;
-      const d=n<r[0]?r[0]-n:n>r[1]?n-r[1]:0; if(d<bd){bd=d;best=z;} });
-    if(best&&bd<=5) hits.add(best.key); else matchSize.free.push(String(n));
-  });
-  return [...hits];
-}
-function parseVoice(raw,ctxSchool){
-  const t=vNorm(raw);
-  const out={raw,free:'',schools:[],school:null,gender:null,item:null,season:null,gparts:[],vars:[],sizes:[],sizeKeys:[]};
-  out.schools=findSchools(t); out.school=out.schools.length===1?out.schools[0]:(out.schools[0]&&!ctxSchool?out.schools[0]:null);
-  if(out.schools.length>1&&ctxSchool&&out.schools.includes(ctxSchool)) out.school=ctxSchool;
-  if(out.schools.length>1&&!out.school) out.school=out.schools[0];
-  const s=out.school||ctxSchool;
-  if(/女子|女の子|女性|おんなのこ|じょし/.test(t)) out.gender='女'; else if(/男子|男の子|男性|おとこのこ|だんし/.test(t)) out.gender='男';
-  if(/夏/.test(t)) out.season='夏'; else if(/冬/.test(t)) out.season='冬';
-  if(!s) return out;
-  // 品目
-  for(const [re,names] of ITEM_SYN){
-    if(!re.test(t)) continue;
-    const cand=s.items.filter(i=>names.includes(i.n)||names.some(n=>i.n.includes(n)));
-    const pick=cand.find(i=>!out.gender||i.g==='共'||i.g===out.gender)||cand[0];
-    if(pick){ out.item=pick; break; }
-  }
-  if(!out.item&&/半袖|ハーフパンツ|ハーフ|トレシャツ|トレパン|トレーナー/.test(t)) out.item=s.items.find(i=>i.n==='体操服')||null;
-  if(out.item&&out.item.n==='体操服'){
-    if(/半袖/.test(t)) out.gparts.push('半袖'); if(/ハーフ/.test(t)) out.gparts.push('ハーフパンツ');
-    if(/トレシャツ|トレーナー/.test(t)) out.gparts.push('トレシャツ'); if(/トレパン/.test(t)) out.gparts.push('トレパン');
-    if(!out.season&&out.gparts.length) out.season=['半袖','ハーフパンツ'].includes(out.gparts[0])?'夏':'冬';
-  }
-  if(out.item) out.item.v.forEach(v=>{ if(v.length>=1&&t.includes(v)&&!['夏','冬'].includes(v)) out.vars.push(v); });
-  if(out.item&&out.season&&out.item.n!=='体操服'&&out.item.v.includes(out.season)) out.vars.push(out.season);
-  if(out.item){ out.sizeKeys=matchSize(s,out.item,t); out.free=matchSize.free.join('・'); const L=sizeList(s,out.item); out.sizes=L.filter(z=>out.sizeKeys.includes(z.key)).map(z=>z.text); if(out.free) out.sizes.push(out.free+'（その他のサイズ）'); }
-  return out;
-}
-window.__voiceParse=(txt)=>{const p=parseVoice(txt,school());return {school:p.school&&p.school.disp,cands:p.schools.map(x=>x.disp),gender:p.gender,item:p.item&&p.item.n,season:p.season,gparts:p.gparts,vars:p.vars,sizes:p.sizes};};
 
-const KB_MSG='この開き方では「押して話す」が使えません。かわりに下の「聞き取った言葉」の欄をタップし、キーボード右下のマイクを押して話してください。';
-function kbMode(){ const t=$('vText'); t.focus(); t.classList.add('kb'); }
-function vSet(msg,cls){ const el=$('vStatus'); el.textContent=msg; el.className='v-status '+(cls||''); }
-function renderVoice(){
-  if(document.activeElement!==$('vText')) $('vText').value=vText;
-  $('vMic').classList.toggle('on',recOn); $('vMic').querySelector('b').textContent=useKb()?'押して、キーボードのマイクで話す':(recOn?'聞き取り中… 押すと止める':'押して話す');
-  const p=vParsed; const box=$('vResult');
-  if(!p){box.innerHTML='';$('vApply').disabled=true;return;}
-  const s=p.school||school();
-  const row=(k,v,ok)=>`<div class="vrow"><span>${k}</span><b class="${ok?'':'miss'}">${v}</b></div>`;
-  let schoolCell=p.school?esc(p.school.disp):(school()?esc(school().disp)+'（選択中のまま）':'聞き取れず');
-  let alt='';
-  if(p.schools.length>1) alt=`<div class="valt"><span>同じ名前の学校があります。正しい方を押してください：</span>${p.schools.map(x=>`<button class="chip sm" data-vschool="${x.id}" aria-pressed="${p.school&&p.school.id===x.id}">${esc(x.disp)}</button>`).join('')}</div>`;
-  const itemTxt=p.item?esc(p.item.n+(p.vars.length?'（'+p.vars.join('・')+'）':'')+(p.item.n==='体操服'&&p.season?'（'+p.season+(p.gparts.length?'：'+p.gparts.join('・'):'')+'）':'')):'聞き取れず';
-  box.innerHTML=row('学校',schoolCell,!!(p.school||school()))+alt+row('性別',p.gender?p.gender+'子':'聞き取れず',!!p.gender)+row('品目',itemTxt,!!p.item)+row('サイズ',p.sizes.length?esc(p.sizes.join('・')):'聞き取れず',!!p.sizes.length);
-  $('vApply').disabled=!(p.school||school());
+/* ============ 電話モード（1画面に1つの質問） ============ */
+const RKEY='sakuraya-recent-schools';
+let recent=[]; try{recent=JSON.parse(localStorage.getItem(RKEY)||'[]')}catch(_){recent=[]}
+function pushRecent(id){ recent=[id,...recent.filter(x=>x!==id)].slice(0,6); try{localStorage.setItem(RKEY,JSON.stringify(recent))}catch(_){} }
+const PM={step:'school',city:null,q:''};
+const PM_STEPS=['school','gender','item','kind','size','confirm'];
+const PM_TITLE={school:'どこの学校ですか？',gender:'男子ですか、女子ですか？',item:'何をお探しですか？',kind:'季節・種類は？',size:'サイズは？',confirm:'この内容で復唱してください'};
+function pmHasKind(){ const it=curItem(); return !!it&&(isGym(it)||it.v.length>0); }
+function pmGo(step){ PM.step=step; renderPM(); $('pm').scrollTop=0; }
+function pmNext(){ const i=PM_STEPS.indexOf(PM.step); let n=PM_STEPS[i+1]; if(n==='kind'&&!pmHasKind()) n='size'; pmGo(n); }
+function pmBack(){ const i=PM_STEPS.indexOf(PM.step); if(i<=0){ if(PM.city&&!PM.q){PM.city=null;renderPM();} return; } let n=PM_STEPS[i-1]; if(n==='kind'&&!pmHasKind()) n='item'; pmGo(n); }
+function openPM(){ PM.step=school()?'gender':'school'; PM.city=null; PM.q=''; $('pm').hidden=false; document.body.classList.add('pm-open'); renderPM(); }
+function closePM(){ $('pm').hidden=true; document.body.classList.remove('pm-open'); $('picker').classList.toggle('collapsed',!!school()); render(); }
+function pmSizeText(){ const s=school(),it=curItem(); if(!s||!it) return ''; const z=sizeList(s,it).filter(z=>S.sizes.has(z.key)).map(z=>z.text); if(S.sizeFree.trim()) z.push(S.sizeFree.trim()); return z.join('・'); }
+function pmItemText(){ const it=curItem(); if(!it) return ''; const bits=[]; if(isGym(it)&&S.season) bits.push(S.season+(S.gparts.size?'：'+[...S.gparts].join('・'):'')); if(S.vars.size) bits.push([...S.vars].join('・')); return it.n+(bits.length?'（'+bits.join('／')+'）':''); }
+function pmCrumbs(){
+  const s=school(); const cells=[
+    ['school','学校',s?s.full:''],['gender','性別',s?(S.gender==='all'?'指定なし':S.gender+'子'):''],
+    ['item','品目',s&&PM_STEPS.indexOf(PM.step)>2?pmItemText():''],['size','サイズ',PM.step==='confirm'?(pmSizeText()||'未定'):'']];
+  return `<div class="pm-crumbs">${cells.map(([k,l,v])=>`<button class="pm-crumb${PM.step===k||(k==='item'&&PM.step==='kind')?' cur':''}" data-pgo="${k}" ${v||k==='school'?'':'disabled'}><small>${l}</small><b>${esc(v||'—')}</b></button>`).join('')}</div>`;
 }
-function openVoice(){ $('vsheet').hidden=false; $('vscrim').hidden=false; vText='';vParsed=null; $('vText').value=''; $('vText').classList.remove('kb');
-  if(useKb()) vSet('赤いボタンを押すとキーボードが出ます。右下のマイクのボタンを押して、復唱してください。','');
-  else vSet('「押して話す」を押してから、復唱してください。','');
-  renderVoice(); }
-function closeVoice(){ if(rec&&recOn) rec.abort(); recOn=false; $('vsheet').hidden=true; $('vscrim').hidden=true; }
-function startRec(){
-  if(!SR){ vSet(KB_MSG,'err'); kbMode(); return; }
-  rec=new SR(); rec.lang='ja-JP'; rec.interimResults=true; rec.continuous=true; rec.maxAlternatives=1;
-  let finalT='';
-  rec.onstart=()=>{recOn=true;vSet('聞き取り中…　話し終わったらもう一度押してください','live');renderVoice();};
-  rec.onresult=e=>{ let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) finalT+=r[0].transcript; else interim+=r[0].transcript; }
-    vText=finalT+interim; vParsed=parseVoice(vText,school()); renderVoice(); };
-  rec.onerror=e=>{ const m={'not-allowed':KB_MSG,'service-not-allowed':KB_MSG,'no-speech':'声が聞き取れませんでした。スマホを口に近づけて、もう一度試してください。','network':'ネットにつながっていないため聞き取れません。電波を確認してください。','audio-capture':'マイクが見つかりません。','aborted':'聞き取りを止めました。'}[e.error]||('うまく聞き取れませんでした（'+e.error+'）');
-    vSet(m,e.error==='aborted'?'':'err'); if(m===KB_MSG){ srBroken=true; try{localStorage.setItem('sakuraya-sr-broken','1');}catch(_){} kbMode(); renderVoice(); } };
-  rec.onend=()=>{ recOn=false; if(vText){vParsed=parseVoice(vText,school()); vSet('聞き取りました。内容を確認して「この内容で入力」を押してください。','ok');} renderVoice(); };
-  try{ rec.start(); }catch(err){ vSet('聞き取りを始められませんでした：'+err.message,'err'); }
+function pmSchoolBtn(s){ return `<button class="pm-btn pm-school" data-pschool="${s.id}"><small>${esc(s.pref)}</small>${esc(s.full)}</button>`; }
+function pmSchoolResults(){
+  const box=$('pmResults'); if(!box) return; let body='';
+  const terms=PM.q.trim().split(/[\s\u3000]+/).map(norm).filter(Boolean);
+  if(terms.length){
+    const hits=SCHOOLS.filter(x=>terms.every(t=>hayOf(x).includes(t))).slice(0,30);
+    body=hits.length?`<div class="pm-grid one">${hits.map(pmSchoolBtn).join('')}</div>`:`<p class="pm-note">見つかりません。文字を消して、市町から選んでください。</p>`;
+  }else if(PM.city){
+    const list=SCHOOLS.filter(x=>x.city===PM.city).sort((a,b)=>a.kana.localeCompare(b.kana,'ja'));
+    body=`<p class="pm-sub">${esc(PM.city)}の学校（${list.length}校）</p><div class="pm-grid one">${list.map(pmSchoolBtn).join('')}</div>`;
+  }else{
+    const rs=recent.map(id=>SCHOOLS.find(x=>x.id===id)).filter(Boolean);
+    if(rs.length) body+=`<p class="pm-sub">最近の学校</p><div class="pm-grid one">${rs.map(pmSchoolBtn).join('')}</div>`;
+    const cities=[...new Set(SCHOOLS.map(x=>x.city))].sort((a,b)=>cityKana(a).localeCompare(cityKana(b),'ja'));
+    body+=`<p class="pm-sub">市町から選ぶ</p><div class="pm-grid">${cities.map(c=>`<button class="pm-btn" data-pcity="${esc(c)}">${esc(c)}<small>${SCHOOLS.filter(x=>x.city===c).length}校</small></button>`).join('')}</div>`;
+  }
+  box.innerHTML=body;
 }
-function applyVoice(){
-  const p=vParsed; if(!p) return; const s=p.school||school(); if(!s) return;
-  if(!school()||school().id!==s.id) selectSchool(s.id);
-  if(p.gender) S.gender=p.gender;
-  if(p.item){ S.item=p.item.n; resetVars(); S.sizes.clear();
-    p.vars.forEach(v=>S.vars.add(v)); if(p.item.n==='体操服'&&p.season){S.season=p.season;p.gparts.forEach(g=>S.gparts.add(g));}
-    p.sizeKeys.forEach(k=>S.sizes.add(k)); S.sizeFree=p.free||''; }
-  $('picker').classList.add('collapsed'); closeVoice(); render(); window.scrollTo({top:0});
-  toast('音声の内容を入力しました。違うところはタップで直せます');
+function renderPM(){
+  const s=school(); let body='';
+  if(PM.step==='school'){
+    body+=`<input class="pm-search" id="pmQ" type="search" placeholder="学校名・よみで探す（例：にしちゅう）" value="${esc(PM.q)}" autocomplete="off"><div id="pmResults" class="pm-body"></div>`;
+  }else if(PM.step==='gender'){
+    body+=`<div class="pm-grid one big">${[['女','女子','g-f'],['男','男子','g-m'],['all','指定なし','g-u']].map(([k,l,c])=>`<button class="pm-btn pm-huge" data-pgender="${k}"><span class="gmark ${c}"></span>${l}</button>`).join('')}</div>`;
+  }else if(PM.step==='item'){
+    const items=s.items.filter(i=>gOk(i,S.gender));
+    body+=`<div class="pm-grid">${items.map(i=>`<button class="pm-btn" data-pitem="${esc(i.n)}">${esc(i.n)}${i.d?`<small>${esc(i.d)}</small>`:''}</button>`).join('')}</div>`;
+  }else if(PM.step==='kind'){
+    const it=curItem();
+    if(isGym(it)){
+      body+=`<div class="pm-grid two">${Object.keys(GYM).map(k=>`<button class="pm-btn pm-big${S.season===k?' on':''}" data-pseason="${k}">${k}</button>`).join('')}</div>`;
+      if(S.season) body+=`<p class="pm-sub">${S.season}の種類（いくつでも選べます）</p><div class="pm-grid two">${GYM[S.season].map(g=>`<button class="pm-btn${S.gparts.has(g)?' on':''}" data-pgpart="${g}">${g}</button>`).join('')}</div>`;
+      const o=otherVars(it); if(o.length) body+=`<p class="pm-sub">色など</p><div class="pm-grid three">${o.map(v=>`<button class="pm-btn${S.vars.has(v)?' on':''}" data-pvar="${esc(v)}">${esc(v)}</button>`).join('')}</div>`;
+      body+=`<button class="pm-next" data-pnext="1">${S.season?'次へ（サイズ）':'季節を指定せずに次へ'}</button>`;
+    }else{
+      body+=`<div class="pm-grid two">${it.v.map(v=>`<button class="pm-btn pm-big" data-pvar1="${esc(v)}">${esc(v)}</button>`).join('')}</div><button class="pm-skip" data-pnext="1">指定なしで次へ</button>`;
+    }
+  }else if(PM.step==='size'){
+    const it=curItem(); const list=sizeList(s,it); const k=chartKey(s,it);
+    if(k) body+=`<p class="pm-sub">${esc(CHARTS[k].name)}の札</p>`;
+    body+=`<div class="pm-grid${list.length>4?'':' one'}">${list.map(z=>`<button class="pm-btn pm-size" data-psize="${esc(z.key)}">${z.dot!==undefined?`<span class="sdot${z.dot?'':' none'}" style="${z.dot?'background:'+DOT[z.dot]:''}"></span>`:''}<span>${esc(z.label)}${z.sub?`<small>${esc(z.sub)}</small>`:''}</span></button>`).join('')}</div>
+      <div class="pm-free"><input class="pm-search" id="pmFree" placeholder="その他のサイズ（例：W82）" value="${esc(S.sizeFree)}" autocomplete="off"><button class="pm-next sm" data-pfree="1">決定</button></div>
+      <button class="pm-skip" data-pnext="1">サイズ未定で次へ</button>`;
+  }else if(PM.step==='confirm'){
+    const g=S.gender==='all'?'':S.gender+'子の'; const sz=pmSizeText();
+    const it=curItem(); const fukusho=`${s.disp}、${g}${pmItemText()}${sz?'、サイズ '+sz:''}でよろしいですか？`;
+    body+=`<div class="pm-sum"><div class="pm-sum-row"><span>学校</span><b>${esc(s.disp)}</b></div><div class="pm-sum-row"><span>性別</span><b>${S.gender==='all'?'指定なし':S.gender+'子'}</b></div><div class="pm-sum-row"><span>品目</span><b>${esc(pmItemText())}</b></div><div class="pm-sum-row"><span>サイズ</span><b>${esc(sz||'未定')}</b></div>${it&&it.d?`<div class="pm-sum-row"><span>メモ</span><b class="thin">${esc(it.n+'：'+it.d)}</b></div>`:''}</div>
+      <p class="pm-sub">復唱</p><p class="pm-fukusho">「${esc(fukusho)}」</p>
+      <div class="pm-grid one"><button class="pm-btn pm-primary" data-pmemo="1">通話メモに残す</button><button class="pm-btn" data-pmore="1">同じ学校で別の品目を聞く</button><button class="pm-btn" data-pnew="1">次の電話へ（最初から）</button></div>`;
+  }
+  const back=PM.step==='school'&&!PM.city?'':`<button class="pm-back" data-pback="1">‹ 戻る</button>`;
+  $('pm').innerHTML=`<div class="pm-top">${back}<b class="pm-mode">電話モード</b><button class="pm-exit" data-pexit="1">通常画面へ</button></div>
+    ${pmCrumbs()}<h2 class="pm-q">${PM_TITLE[PM.step]}</h2><div class="pm-body">${body}</div>`;
+  const q=$('pmQ'); if(q){ pmSchoolResults(); q.addEventListener('input',e=>{PM.q=e.target.value; pmSchoolResults();}); }
+  const f=$('pmFree'); if(f){ f.addEventListener('input',e=>{S.sizeFree=e.target.value;}); }
 }
-$('openVoice').onclick=openVoice; $('vClose').onclick=closeVoice; $('vscrim').onclick=closeVoice;
-const isStandalone=()=>window.navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
-let srBroken=false; try{srBroken=localStorage.getItem('sakuraya-sr-broken')==='1';}catch(_){}
-const useKb=()=>!SR||isStandalone()||srBroken;
-function kbFocus(){ const t=$('vText'); t.classList.add('kb'); t.focus(); vSet('キーボードが出たら、右下のマイクのボタンを押して話してください。','live'); }
-$('vMic').onclick=()=>{ if(useKb()){ kbFocus(); return; } if(recOn){ rec.stop(); } else { vText='';vParsed=null;renderVoice(); startRec(); } };
-$('vApply').onclick=applyVoice;
-$('vText').addEventListener('input',e=>{ vText=e.target.value; vParsed=vText.trim()?parseVoice(vText,school()):null; renderVoice(); if(vText.trim()) vSet('読み取りました。内容を確認して「この内容で入力」を押してください。','ok'); });
-$('vRetry').onclick=()=>{ if(rec&&recOn) rec.abort(); vText='';vParsed=null; $('vText').value=''; vSet('「押して話す」を押してから、復唱してください。',''); renderVoice(); };
-$('vResult').addEventListener('click',e=>{const b=e.target.closest('[data-vschool]');if(!b||!vParsed)return;const s=SCHOOLS.find(x=>x.id===b.dataset.vschool);vParsed=parseVoice(vText,s);vParsed.school=s;if(!vParsed.schools.includes(s))vParsed.schools.unshift(s);renderVoice();});
+$('pm').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return; const d=b.dataset;
+  if(d.pexit){closePM();return;}
+  if(d.pback){pmBack();return;}
+  if(d.pgo){ if(d.pgo==='school'){PM.city=null;PM.q='';} pmGo(d.pgo==='item'&&PM.step==='confirm'?'item':d.pgo); return; }
+  if(d.pcity){PM.city=d.pcity;renderPM();$('pm').scrollTop=0;return;}
+  if(d.pschool){ selectSchool(d.pschool); pushRecent(d.pschool); PM.q=''; PM.city=null; pmGo('gender'); return; }
+  if(d.pgender){ S.gender=d.pgender; const it=curItem(); if(!it||!gOk(it,S.gender)){S.item='';} pmGo('item'); return; }
+  if(d.pitem){ S.item=d.pitem; resetVars(); S.sizes.clear(); S.sizeFree=''; pmNext(); return; }
+  if(d.pseason){ if(S.season!==d.pseason){S.season=d.pseason;S.gparts.clear();} renderPM(); return; }
+  if(d.pgpart){ S.gparts.has(d.pgpart)?S.gparts.delete(d.pgpart):S.gparts.add(d.pgpart); renderPM(); return; }
+  if(d.pvar){ S.vars.has(d.pvar)?S.vars.delete(d.pvar):S.vars.add(d.pvar); renderPM(); return; }
+  if(d.pvar1){ S.vars.clear(); S.vars.add(d.pvar1); pmGo('size'); return; }
+  if(d.psize){ S.sizes.clear(); S.sizes.add(d.psize); pmGo('confirm'); return; }
+  if(d.pfree){ S.sizeFree=$('pmFree').value; S.sizes.clear(); pmGo('confirm'); return; }
+  if(d.pnext){ pmNext(); return; }
+  if(d.pmemo){ openMemo(); return; }
+  if(d.pmore){ S.item=''; resetVars(); S.sizes.clear(); S.sizeFree=''; pmGo('item'); return; }
+  if(d.pnew){ resetAll(); PM.step='school'; PM.city=null; PM.q=''; renderPM(); $('pm').scrollTop=0; return; }
+});
+$('openPM').onclick=openPM;
 
 renderLogs(); render();
 </script>
