@@ -237,6 +237,24 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
 .reset-btn:hover{border-color:var(--muted)}
 .day-chips{gap:6px}
 .day-chips .chip small{font-size:11px;opacity:.7;margin-left:4px}
+.voice-fab{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:30;border:0;border-radius:999px;background:var(--ink);color:var(--surface);height:58px;padding:0 20px 0 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;box-shadow:0 6px 20px rgba(10,15,25,.28)}
+.vsheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow-y:auto;background:var(--surface);z-index:41;border-radius:18px 18px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom,0px) + 16px);display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);max-width:640px;margin:0 auto}
+.beta{font-size:11px;font-weight:700;color:var(--warn);border:1px dashed var(--warn);border-radius:6px;padding:1px 6px;vertical-align:middle;font-family:var(--f-body)}
+.v-hint{margin:0;color:var(--muted);font-size:13px}
+.v-mic{border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);min-height:84px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:18px}
+.v-mic.on{background:#1E8A3A;color:#fff;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(30,138,58,.18)}}
+@media (prefers-reduced-motion:reduce){.v-mic.on{animation:none}}
+.v-status{margin:0;font-size:13px;color:var(--muted);min-height:1.4em}
+.v-status.err{color:var(--accent)}.v-status.ok{color:var(--ok)}.v-status.live{color:#1E8A3A;font-weight:700}
+.v-text{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:17px;min-height:52px}
+.v-text.ph{color:var(--muted);font-size:14px}
+.v-result{display:grid;gap:6px}
+.vrow{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding:4px 2px}
+.vrow span{font-size:12px;color:var(--muted)}.vrow b{font-size:16px}.vrow b.miss{color:var(--muted);font-weight:400}
+.valt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.btn[disabled]{opacity:.45}
+.app{padding-bottom:96px}
 @media (max-width:520px){.brand span{display:none}.brand h1{font-size:15px}.reset-btn,.memo-btn{padding:0 12px;height:40px}.top{gap:8px}}
 .count-note{font-size:12px;color:var(--muted)}
 </style>
@@ -291,6 +309,17 @@ h1,h2,h3{font-family:var(--f-disp);margin:0;text-wrap:balance}
   <div class="chips day-chips" id="memoDays"></div>
   <div class="btnrow"><button class="btn" id="copyDay">この日をコピー</button><button class="btn" id="copyMemo">全件コピー</button></div>
   <div class="logs" id="logs"></div>
+</aside>
+<button class="voice-fab" id="openVoice" aria-label="音声で入力"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.59a6 6 0 0 0 5-5.91Z"/></svg><span>音声入力</span></button>
+<div class="scrim" id="vscrim" hidden></div>
+<aside class="vsheet" id="vsheet" hidden aria-label="音声入力">
+  <div class="sheet-head"><h2>音声入力 <small class="beta">テスト版</small></h2><button class="x" id="vClose" aria-label="閉じる">×</button></div>
+  <p class="v-hint">例：「丸亀の西中、女子のセーラー、冬の165」</p>
+  <button class="v-mic" id="vMic"><svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true"><path fill="currentColor" d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-6a3.5 3.5 0 1 0-7 0v6A3.5 3.5 0 0 0 12 15Zm6-3.5a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.91V20H8.5a1 1 0 1 0 0 2h7a1 1 0 1 0 0-2H13v-2.59a6 6 0 0 0 5-5.91Z"/></svg><b>押して話す</b></button>
+  <p class="v-status" id="vStatus"></p>
+  <div class="field"><span class="label">聞き取った言葉</span><div class="v-text" id="vText"></div></div>
+  <div class="field"><span class="label">こう読み取りました</span><div class="v-result" id="vResult"></div></div>
+  <div class="btnrow"><button class="btn primary" id="vApply" disabled>この内容で入力</button><button class="btn" id="vRetry">やり直す</button></div>
 </aside>
 <div class="toast" id="toast" hidden></div>
 
@@ -564,6 +593,151 @@ $('copyDay').onclick=()=>copyText(dayBlock(memoDay),dayLabel(memoDay)+'のメモ
 $('memoDays').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(!b)return;memoDay=b.dataset.day;renderLogs();});
 $('logs').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b)return;memos.splice(+b.dataset.del,1);persist();renderLogs();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sheet').hidden)closeMemo();});
+
+/* ============ 音声入力（テスト版） ============ */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, recOn=false, vText='', vParsed=null;
+const ITEM_SYN=[
+  [/体操服|体操着|ジャージ|体育服|たいそうふく|ハーフパンツ|トレパン|トレシャツ/,['体操服']],
+  [/学ラン|がくらん|詰襟|詰め襟|つめえり|学生服/,['学ラン','学生服']],
+  [/セーラー/,['セーラー']],[/ジャンパースカート|ジャンスカ/,['ジャンパースカート']],[/スカート/,['スカート']],
+  [/ブレザー|ブレーザー/,['ブレザー']],[/ジャケット/,['ジャケット']],[/半ズボン|短パン/,['半ズボン']],[/ズボン|スラックス|(?<!ハーフ|トレ)パンツ/,['ズボン','半ズボン']],[/ネクタイ/,['ネクタイ']],[/リボン/,['リボン']],[/ベスト/,['ベスト']],
+  [/セーター/,['セーター']],[/カーディガン/,['カーディガン']],[/ブラウス/,['ブラウス']],[/ポロ/,['ポロシャツ','ポロ','半袖ポロ']],
+  [/カッター|ワイシャツ|シャツ/,['シャツ','長袖シャツ','半袖シャツ','開襟シャツ']],[/コート/,['コート']],[/ウインドブレーカー/,['ウインドブレーカー']]
+];
+function vNorm(t){
+  let x=String(t||'').normalize('NFKC').replace(/[\s、。,.]/g,'');
+  x=x.replace(/エスエス/g,'SS').replace(/(スリー|3)エル/g,'3L').replace(/(フォー|4)エル/g,'4L').replace(/(ファイブ|5)エル/g,'5L')
+     .replace(/エルエル|ダブルエル/g,'LL').replace(/エル/g,'L').replace(/エム/g,'M').replace(/エス(?!テ)/g,'S');
+  return x;
+}
+function schoolKeys(s){
+  const cb=s.city.replace(/(市|町)$/,'');
+  const shortB=s.short.replace(/(小|中|高)$/,''); const suf=(s.short.match(/(小|中|高)$/)||[''])[0];
+  const keys=new Set([s.full,s.short,s.name]);
+  if(suf){ const sfx={小:['小学校','小学','小'],中:['中学校','中学','中'],高:['高等学校','高校','高']}[suf]; sfx.forEach(x=>keys.add(shortB+x)); }
+  keys.add(s.full.replace(/(保育園|保育所|幼稚園|こども園)$/,''));
+  return {keys:[...keys].filter(k=>k&&k.length>=2),cb,kana:s.kana,kanaSuf:s.kana+({小:'しょう',中:'ちゅう',高:'こう'}[suf]||'')};
+}
+function findSchools(t){
+  const th=hira(t);
+  const scored=SCHOOLS.map(s=>{
+    const k=schoolKeys(s); let sc=0;
+    for(const key of k.keys){ if(t.includes(key)) sc=Math.max(sc,key.length*2); }
+    if(k.kana.length>=2&&th.includes(k.kanaSuf)) sc=Math.max(sc,k.kanaSuf.length*2);
+    else if(k.kana.length>=3&&th.includes(k.kana)) sc=Math.max(sc,k.kana.length+1);
+    if(sc&&(t.includes(k.cb)||th.includes(cityKana(s.city).replace(/(し|ちょう)$/,'')))) sc+=4;
+    if(sc&&/中学|中$/.test(t)&&s.kind==='中学校') sc+=1;
+    return {s,sc};
+  }).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc);
+  if(!scored.length) return [];
+  const top=scored[0].sc; return scored.filter(x=>x.sc>=top-1).slice(0,4).map(x=>x.s);
+}
+function rangeOf(label,sub){
+  const txt=label+(sub?' '+sub:''); const nums=(txt.match(/\d+/g)||[]).map(Number);
+  if(!nums.length) return null;
+  if(/^〜|^～/.test(label)||/^〜/.test(sub||'')){const m=Math.max(...nums);return [m-25,m];}
+  if(/以上|〜$|～$/.test(label)||/〜$/.test(sub||'')) return [Math.min(...nums),999];
+  if(/〜|～/.test(label)) return [Math.min(...nums),Math.max(...nums)];
+  return [Math.min(...nums),Math.max(...nums)];
+}
+function matchSize(s,it,t){
+  matchSize.free=[];
+  const list=sizeList(s,it); const hits=new Set();
+  // 札の色
+  const col=(t.match(/(赤|青|黄色|黄|緑)(色)?(の)?シール/)||[])[1]||(/シールなし|シール無し/.test(t)?'none':null);
+  if(col){ const c=col==='黄色'?'黄':col; list.forEach(z=>{ if((c==='none'&&z.dot===null)||z.dot===c) hits.add(z.key); }); }
+  // S/M/L
+  const letters=t.match(/(5L|4L|3L|LL|SS|S|M|L)(?![a-zA-Z])/g)||[];
+  letters.forEach(L=>list.forEach(z=>{ if(z.label===L||z.label.split('／')[0]===L) hits.add(z.key); }));
+  // 数字（年・着・枚・人・円の前は除く）
+  const nums=[...t.matchAll(/(\d{2,3})(?!\d|年|着|枚|人|円|組|番)/g)].map(m=>+m[1]).filter(n=>n>=50&&n<=200);
+  nums.forEach(n=>{
+    let best=null,bd=1e9;
+    list.forEach(z=>{ if(z.label==='フリー')return; const r=rangeOf(z.label,z.sub); if(!r)return;
+      const d=n<r[0]?r[0]-n:n>r[1]?n-r[1]:0; if(d<bd){bd=d;best=z;} });
+    if(best&&bd<=5) hits.add(best.key); else matchSize.free.push(String(n));
+  });
+  return [...hits];
+}
+function parseVoice(raw,ctxSchool){
+  const t=vNorm(raw);
+  const out={raw,free:'',schools:[],school:null,gender:null,item:null,season:null,gparts:[],vars:[],sizes:[],sizeKeys:[]};
+  out.schools=findSchools(t); out.school=out.schools.length===1?out.schools[0]:(out.schools[0]&&!ctxSchool?out.schools[0]:null);
+  if(out.schools.length>1&&ctxSchool&&out.schools.includes(ctxSchool)) out.school=ctxSchool;
+  if(out.schools.length>1&&!out.school) out.school=out.schools[0];
+  const s=out.school||ctxSchool;
+  if(/女子|女の子|女性|おんなのこ|じょし/.test(t)) out.gender='女'; else if(/男子|男の子|男性|おとこのこ|だんし/.test(t)) out.gender='男';
+  if(/夏/.test(t)) out.season='夏'; else if(/冬/.test(t)) out.season='冬';
+  if(!s) return out;
+  // 品目
+  for(const [re,names] of ITEM_SYN){
+    if(!re.test(t)) continue;
+    const cand=s.items.filter(i=>names.includes(i.n)||names.some(n=>i.n.includes(n)));
+    const pick=cand.find(i=>!out.gender||i.g==='共'||i.g===out.gender)||cand[0];
+    if(pick){ out.item=pick; break; }
+  }
+  if(!out.item&&/半袖|ハーフパンツ|ハーフ|トレシャツ|トレパン|トレーナー/.test(t)) out.item=s.items.find(i=>i.n==='体操服')||null;
+  if(out.item&&out.item.n==='体操服'){
+    if(/半袖/.test(t)) out.gparts.push('半袖'); if(/ハーフ/.test(t)) out.gparts.push('ハーフパンツ');
+    if(/トレシャツ|トレーナー/.test(t)) out.gparts.push('トレシャツ'); if(/トレパン/.test(t)) out.gparts.push('トレパン');
+    if(!out.season&&out.gparts.length) out.season=['半袖','ハーフパンツ'].includes(out.gparts[0])?'夏':'冬';
+  }
+  if(out.item) out.item.v.forEach(v=>{ if(v.length>=1&&t.includes(v)&&!['夏','冬'].includes(v)) out.vars.push(v); });
+  if(out.item&&out.season&&out.item.n!=='体操服'&&out.item.v.includes(out.season)) out.vars.push(out.season);
+  if(out.item){ out.sizeKeys=matchSize(s,out.item,t); out.free=matchSize.free.join('・'); const L=sizeList(s,out.item); out.sizes=L.filter(z=>out.sizeKeys.includes(z.key)).map(z=>z.text); if(out.free) out.sizes.push(out.free+'（その他のサイズ）'); }
+  return out;
+}
+window.__voiceParse=(txt)=>{const p=parseVoice(txt,school());return {school:p.school&&p.school.disp,cands:p.schools.map(x=>x.disp),gender:p.gender,item:p.item&&p.item.n,season:p.season,gparts:p.gparts,vars:p.vars,sizes:p.sizes};};
+
+function vSet(msg,cls){ const el=$('vStatus'); el.textContent=msg; el.className='v-status '+(cls||''); }
+function renderVoice(){
+  $('vText').textContent=vText||'（ここに聞き取った言葉が出ます）';
+  $('vText').classList.toggle('ph',!vText);
+  $('vMic').classList.toggle('on',recOn); $('vMic').querySelector('b').textContent=recOn?'聞き取り中… 押すと止める':'押して話す';
+  const p=vParsed; const box=$('vResult');
+  if(!p){box.innerHTML='';$('vApply').disabled=true;return;}
+  const s=p.school||school();
+  const row=(k,v,ok)=>`<div class="vrow"><span>${k}</span><b class="${ok?'':'miss'}">${v}</b></div>`;
+  let schoolCell=p.school?esc(p.school.disp):(school()?esc(school().disp)+'（選択中のまま）':'聞き取れず');
+  let alt='';
+  if(p.schools.length>1) alt=`<div class="valt"><span>同じ名前の学校があります。正しい方を押してください：</span>${p.schools.map(x=>`<button class="chip sm" data-vschool="${x.id}" aria-pressed="${p.school&&p.school.id===x.id}">${esc(x.disp)}</button>`).join('')}</div>`;
+  const itemTxt=p.item?esc(p.item.n+(p.vars.length?'（'+p.vars.join('・')+'）':'')+(p.item.n==='体操服'&&p.season?'（'+p.season+(p.gparts.length?'：'+p.gparts.join('・'):'')+'）':'')):'聞き取れず';
+  box.innerHTML=row('学校',schoolCell,!!(p.school||school()))+alt+row('性別',p.gender?p.gender+'子':'聞き取れず',!!p.gender)+row('品目',itemTxt,!!p.item)+row('サイズ',p.sizes.length?esc(p.sizes.join('・')):'聞き取れず',!!p.sizes.length);
+  $('vApply').disabled=!(p.school||school());
+}
+function openVoice(){ $('vsheet').hidden=false; $('vscrim').hidden=false; vText='';vParsed=null;
+  if(!SR) vSet('このブラウザでは音声の聞き取りが使えません。iPhoneの「Safari」で開いてください。','err');
+  else vSet('「押して話す」を押してから、復唱してください。','');
+  renderVoice(); }
+function closeVoice(){ if(rec&&recOn) rec.abort(); recOn=false; $('vsheet').hidden=true; $('vscrim').hidden=true; }
+function startRec(){
+  if(!SR){ vSet('このブラウザでは音声の聞き取りが使えません。iPhoneの「Safari」で開いてください。','err'); return; }
+  rec=new SR(); rec.lang='ja-JP'; rec.interimResults=true; rec.continuous=true; rec.maxAlternatives=1;
+  let finalT='';
+  rec.onstart=()=>{recOn=true;vSet('聞き取り中…　話し終わったらもう一度押してください','live');renderVoice();};
+  rec.onresult=e=>{ let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) finalT+=r[0].transcript; else interim+=r[0].transcript; }
+    vText=finalT+interim; vParsed=parseVoice(vText,school()); renderVoice(); };
+  rec.onerror=e=>{ const m={'not-allowed':'マイクの使用が許可されていません。iPhoneの「設定」→「Safari」→「マイク」で「確認」か「許可」にして、もう一度試してください。','service-not-allowed':'音声認識が使えない状態です。「設定」→「一般」→「キーボード」で「音声入力」をオンにし、Safariで開き直してください。','no-speech':'声が聞き取れませんでした。スマホを口に近づけて、もう一度試してください。','network':'ネットにつながっていないため聞き取れません。電波を確認してください。','audio-capture':'マイクが見つかりません。','aborted':'聞き取りを止めました。'}[e.error]||('うまく聞き取れませんでした（'+e.error+'）');
+    vSet(m,e.error==='aborted'?'':'err'); };
+  rec.onend=()=>{ recOn=false; if(vText){vParsed=parseVoice(vText,school()); vSet('聞き取りました。内容を確認して「この内容で入力」を押してください。','ok');} renderVoice(); };
+  try{ rec.start(); }catch(err){ vSet('聞き取りを始められませんでした：'+err.message,'err'); }
+}
+function applyVoice(){
+  const p=vParsed; if(!p) return; const s=p.school||school(); if(!s) return;
+  if(!school()||school().id!==s.id) selectSchool(s.id);
+  if(p.gender) S.gender=p.gender;
+  if(p.item){ S.item=p.item.n; resetVars(); S.sizes.clear();
+    p.vars.forEach(v=>S.vars.add(v)); if(p.item.n==='体操服'&&p.season){S.season=p.season;p.gparts.forEach(g=>S.gparts.add(g));}
+    p.sizeKeys.forEach(k=>S.sizes.add(k)); S.sizeFree=p.free||''; }
+  $('picker').classList.add('collapsed'); closeVoice(); render(); window.scrollTo({top:0});
+  toast('音声の内容を入力しました。違うところはタップで直せます');
+}
+$('openVoice').onclick=openVoice; $('vClose').onclick=closeVoice; $('vscrim').onclick=closeVoice;
+$('vMic').onclick=()=>{ if(recOn){ rec.stop(); } else { vText='';vParsed=null;renderVoice(); startRec(); } };
+$('vApply').onclick=applyVoice;
+$('vRetry').onclick=()=>{ if(rec&&recOn) rec.abort(); vText='';vParsed=null; vSet('「押して話す」を押してから、復唱してください。',''); renderVoice(); };
+$('vResult').addEventListener('click',e=>{const b=e.target.closest('[data-vschool]');if(!b||!vParsed)return;const s=SCHOOLS.find(x=>x.id===b.dataset.vschool);vParsed=parseVoice(vText,s);vParsed.school=s;if(!vParsed.schools.includes(s))vParsed.schools.unshift(s);renderVoice();});
 
 renderLogs(); render();
 </script>
